@@ -212,112 +212,6 @@
 				$this->disconnect();
 		}
 
-		
-		/**
-		* parse_running_config_regex
-		* 
-* This is my first attempt at writing a cisco configuration parser.
-* 
-* These regular expressions took forever to come up with , and they're pretty bad-ass.
-* Each regex stripts out 1 set of objects from the running cnfig, such as the interfaces
-* and their options.
-* 
-* $file string Contents of a running config output that you want pasrsed
-* $return array an array of parsed information from teh config.
-		**/
-		function parse_runnnig_config_regex($file)
-		{
-			$data = array();
-			$debug = false;
-			//$debug = true;   // uncomment to enable excessive debuggnig messages
-			var_dump(preg_match_all('/^Building configuration...(?P<config_bytes>(\d)+)\s+bytes\s*$/', $file, $matches));
-			$data['config_bytes'] = $matches['config_bytse'];
-			//print_r($matches);
-
-			preg_match('/^Current configuration\s*:\s*($|(?P<config_bytes>\d+) bytes)\n(!\n)*!(.*Last configuration change at (?P<config_changed_date>\d{2}:\d{2}:\d{2} \w{3} \w+ \w+ \d+ \d+)\s+by\s+(?P<config_changed_user>\w+)\W*\n!)*(\s+NVRAM config last updated at (?P<nvram_changed_date>\d{2}:\d{2}:\d{2} \w{3} \w+ \w+ \d+ \d+)\s+by\s+(?P<nvram_changed_user>\w+)\W*\n)*$/m', $file, $matches);
-			$data['config_bytes'] = $matches['config_bytse'];
-			$data['config_changed_date'] = $matches['config_changed_date'];
-			$data['config_changed_user'] = $matches['config_changed_user'];
-			$data['nvram_changed_date'] = $matches['nvram_changed_date'];
-			$data['nvram_changed_user'] = $matches['nvram_changed_user'];
-
-			preg_match('/^hostname (?P<hostname>[^\n]+)$/', $file, $matches);
-			$data['hostname'] = $matches['hostname'];
-			if ($debug === true) print_r($matches);
-			
-			preg_match('/^version (?P<option>[^\n]+)$/', $file, $matches);
-			$data['version'] = $matches['option'];
-			if ($debug === true) print_r($matches);
-			
-			preg_match('/^banner motd \^CC(?P<motd_data>(.*\n)+)\^C/m', $file, $matches);
-			$data['motd'] = $matches['motd_data'];
-			if ($debug === true) print_r($matches);
-			
-			preg_match_all('/^vlan (?P<option_tag>.*)\n(?P<option_data>( [^\n]+\n)+)\S/m', $file, $matches);
-			$data['vlans'] = array();
-			foreach ($matches['option_tag'] as $idx => $tag)
-				$data['vlans'][$tag] = $matches['option_data'][$idx];
-			if ($debug === true) print_r($matches);
-			
-			preg_match_all('/^interface (?P<option_tag>.*)\n(?P<option_data>( [^\n]+\n)+)\S/m', $file, $matches);
-			$data['interfaces'] = array();
-			foreach ($matches['option_tag'] as $idx => $tag)
-				$data['interfaces'][$tag] = $matches['option_data'][$idx];
-			if ($debug === true) print_r($matches);
-
-			preg_match_all('/^class-map (?P<option_tag>.*)\n(?P<option_data>( [^\n]+\n)+)\S/m', $file, $matches);
-			$data['class-maps'] = array();
-			foreach ($matches['option_tag'] as $idx => $tag)
-				$data['class-maps'][$tag] = $matches['option_data'][$idx];
-			if ($debug === true) print_r($matches);
-
-			preg_match_all('/^policy-map (?P<option_tag>.*)\n(?P<option_data>( [^\n]+\n)+)\S/m', $file, $matches);
-			$data['policy-maps'] = array();
-			foreach ($matches['option_tag'] as $idx => $tag)
-				$data['policy-maps'][$tag] = $matches['option_data'][$idx];
-			if ($debug === true) print_r($matches);
-
-			preg_match_all('/^route-map (?P<option_tag>.*)\n(?P<option_data>( [^\n]+\n)+)\S/m', $file, $matches);
-			$data['route-maps'] = array();
-			foreach ($matches['option_tag'] as $idx => $tag)
-				$data['route-map'][$tag] = $matches['option_data'][$idx];
-			if ($debug === true) print_r($matches);
-
-			preg_match_all('/^router (?P<option_tag>.*)\n(?P<option_data>( [^\n]+\n)+)\S/m', $file, $matches);
-			$data['routers'] = array();
-			foreach ($matches['option_tag'] as $idx => $tag)
-				$data['router'][$tag] = $matches['option_data'][$idx];
-			if ($debug === true) print_r($matches);
-
-			preg_match_all('/^line(?P<line_data>(\s[^\n]+\n)+)/m', $file, $matches);
-			$data['lines'] = array();
-			foreach ($matches['line_data'] as $idx => $tag)
-				$data['lines'][] = $tag;
-			if ($debug === true) print_r($matches);
-
-			preg_match_all('/^redundancy(?P<ip_data>(\s[^\n]+\n)+)/m', $file, $matches);
-			$data['redundancies'] = array();
-			foreach ($matches['ip_data'] as $idx => $tag)
-				$data['redundancies'][] = $tag;
-			if ($debug === true) print_r($matches);
-
-			preg_match_all('/^ip(?P<ip_data>(\s[^\n]+\n)+)/m', $file, $matches);
-			$data['ips'] = array();
-			foreach ($matches['ip_data'] as $idx => $tag)
-				$data['ips'][] = $tag;
-			if ($debug === true) print_r($matches);
-
-			preg_match_all('/^ipv6(?P<ip_data>(\s[^\n]+\n)+)/m', $file, $matches);
-			$data['ipsv6'] = array();
-			foreach ($matches['ip_data'] as $idx => $tag)
-				$data['ipsv6'][] = $tag;
-			if ($debug === true) print_r($matches);
-
-			
-			return $data;
-			print_r($data);
-		}
-		
 		public function show_int_config($int)
 		{
 			// Enabled Only
@@ -789,4 +683,82 @@
 				return false;
 		}
 	}
+	
+	
+	class cisco_pasrser
+	{
+			function get_space_depth($lines, $x)
+		{
+			if (preg_match('/^(?P<spaces>\s+)*(?P<rest>\S.*)$/', $lines[$x], $matches))
+			{
+				$cdepth = strlen($matches['spaces']);
+			}
+			else
+			{
+				$cdepth = 0;
+			}
+			return $cdepth;	
+		}
+
+		function parse_cisco_children($lines, $x = 0, $depth = 0)
+		{
+			//global $x;
+			$data = array();
+			$last_command = false;
+			for (;$x < sizeof($lines); $x++)
+			{
+				$cdepth = get_space_depth($lines, $x);
+				$command = ltrim($lines[$x]);
+				$arguments = '';
+				$spacepos = strpos($command, ' ');
+				if ($spacepos !== false)
+				{
+					$arguments = substr($command, $spacepos+1);
+					$command = substr($command, 0, $spacepos);
+					//echo "Got C|$command|A|$arguments|<br>";
+				}		
+				if ($cdepth == $depth)
+				{
+					$new_data = array('command' => $command);
+					if ($arguments != '')
+						$new_data['argments'] = trim($arguments);
+					if ($x + 1 < sizeof($lines))
+					{
+						$next_depth = get_space_depth($lines, $x + 1);
+						if ($next_depth > $depth)
+						{
+							$new_data['children'] = parse_cisco_children($lines, $x + 1, $next_depth);
+							while (get_space_depth($lines, $x + 1) > $depth)
+								++$x;
+						}
+					}
+					$data[] = $new_data;
+				}
+				elseif ($cdepth < $depth)
+					return $data;			
+				else
+					echo "SHOULD NEVER GET HERE\n";
+			}
+			return $data;
+		}
+		if (!isset($_SERVER['argv'][1]) || !file_exists($_SERVER['argv'][1]))
+		{
+			die('Specify a (valid) file as the first argument to get it parsed');
+		}
+		$file = str_replace("\r", "", file_get_contents($_SERVER['argv'][1]));
+		$lines = explode("\n", $file);
+		$start_str = 'Building configuration...';
+		$x = 0;
+		while (substr($lines[$x], 0, strlen($start_str)) != $start_str)
+			$x++;
+		$info = array();
+		if (preg_match('/^Current configuration\s*:\s*(?P<config_bytes>$|\d+)( bytes)$/', $lines[$x + 2], $matches))
+		{
+			$info['config_bytes'] = $matches['config_bytes'];
+		}
+		$x += 3;
+		$info['data'] = parse_cisco_children($lines, $x + 1);
+		print_r($info);
+	}
+		
 ?>
