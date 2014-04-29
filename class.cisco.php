@@ -36,6 +36,7 @@
 		private $_prompt;
 		private $_stream;
 		private $_data;
+		private $_response;
 		
 		public function __construct($hostname, $username, $password)
 		{
@@ -65,10 +66,16 @@
 			$this->_data   = false;
 			$this->_stream = ssh2_exec($this->_ssh, $cmd);
 			stream_set_blocking($this->_stream, true);
-			$this->_data = stream_get_contents($this->_stream);
+			$this->_response = stream_get_contents($this->_stream);
+			$this->_data = $this->response;
 			stream_set_blocking($this->_stream, false);
 			//if (strpos($this->_data, '% Invalid input detected') !== false) $this->_data = false;
-			return $this->_data;
+			return $this->_response;
+		}
+		
+		public function get_response()
+		{
+			return $this->_response;
 		}
 		
 		public function disconnect()
@@ -326,8 +333,8 @@
 		public function show_int_config($int)
 		{
 			// Enabled Only
-			if (strpos($this->_prompt, '#') === false)
-				die('Error: User must be enabled to use show_int_config()' . "\n");
+			//if (strpos($this->_prompt, '#') === false)
+			//	die('Error: User must be enabled to use show_int_config()' . "\n");
 			$this->exec('show run int ' . $int);
 			$this->_data = explode("\r\n", $this->_data);
 			for ($i = 0; $i < 5; $i++)
