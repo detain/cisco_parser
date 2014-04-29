@@ -70,24 +70,43 @@
 		 * @return String
 		 * @access public
 		 */
-		function read($pattern = '', $regex = false)
+		public function read($pattern = '', $regex = false)
 		{
-			usleep(1000);
+			//usleep(1000);
 			$this->_response = '';
 			$match = $pattern;
-			while (true) {
+			$i = 0;
+			while (!feof($this->_stream)) {
 				if ($regex) {
 					preg_match($pattern, $this->_response, $matches);
+					//echo 'M:'.print_r($matches, true) . '<br>';
 					$match = isset($matches[0]) ? $matches[0] : array();
 				}
 				$pos = !empty($match) ? strpos($this->_response, $match) : false;
+				//echo ++$i . "POS:".var_export($pos, true).'<br>';
 				if ($pos !== false)
-					return $this->_string_shift($this->_response, $pos + strlen($pattern));
+				{
+					//echo "$match Matching $pattern @ $pos <br>";
+					return $this->_string_shift($this->_response, $pos + strlen($match));
+				}
+				usleep(1000);
 				$response = fgets($this->_stream);
+				//echo "R$i:$response<br>";
 				if (is_bool($response))
-					return $response ? $this->_string_shift($this->_response, strlen($this->_response)) : false;
+				{
+					//echo "Return B $response::".$this->_response."<br>";
+//					return $response ? $this->_string_shift($this->_response, strlen($this->_response)) : false;
+				}
 				$this->_response .= $response;
 			}
+			
+			echo "FEOF !!!!<br>";
+			return $this->_response;
+		}
+		
+		public function write($cmd)
+		{
+			fwrite($this->_stream, $cmd);
 		}
 		
 		public function connect()
@@ -100,11 +119,22 @@
 			ssh2_auth_password($this->_ssh, $this->_username, $this->_password);
 			$this->_stream = ssh2_shell($this->_ssh);
 			$this->connected = true;
+			$this->parse_motd_and_prompt();
 			return true;
 		}
 		
 		public function parse_motd_and_prompt()
 		{
+			$this->_motd = trim($this->read('/.*[>|#]/', true));
+			$this->write("\n");
+			$this->_prompt = trim($this->read('/.*[>|#]/', true));
+			$length = strlen($this->_prompt);
+			if (substr($this->_motd, -$length) == $this->_prompt)
+				$this->_motd = substr($this->_motd, 0, -$length);
+			//echo "MOTD:".$this->_motd."<br>";
+			//echo "Prompt:".$this->_prompt.'<br>';
+			return true;
+			
 			sleep(1);
 			$this->_motd = '';
 			while ($this->_response = fgets($this->_stream))
@@ -152,21 +182,12 @@
 			}
 			$this->_data   = false;
 			fwrite($this->_stream, $cmd);
-			usleep(100);//sleep(1);			
-			//$this->_stream = ssh2_exec($this->_ssh, $cmd);
-			//stream_set_blocking($this->_stream, true);
-			//$this->_response = stream_get_contents($this->_stream);
-			$this->_response = '';
-			while ($line = fgets($this->_stream))
-			{
-				$this->_response .= $line;
-			}
-			$this->_response = trim($this->_response);
+			$this->_response = trim($this->read($this->_prompt));
 			$length = strlen($this->_prompt);
-			if (substr($this->_response, 0, $length) == $this->_prompt)
+			if (substr($this->_response, -$length) == $this->_prompt)
 			{
 				//echo "Found Prompt<br>";
-				$this->_response = substr($this->_response, $length);
+				$this->_response = substr($this->_response, 0, -$length);
 			}
 			$this->_data = $this->_response;
 			//stream_set_blocking($this->_stream, false);			
