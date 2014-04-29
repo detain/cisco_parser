@@ -50,7 +50,7 @@
 		
 		public function connect()
 		{
-			$this->_ssh = ssh2_connect($switch, 22);
+			$this->_ssh = ssh2_connect($this->hostname, 22);
 			if ($this->_ssh === false) {
 				return false;
 			}
