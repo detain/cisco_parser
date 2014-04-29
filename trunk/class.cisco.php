@@ -54,8 +54,6 @@
 				return false;
 			}
 			ssh2_auth_password($this->_ssh, $this->_username, $this->_password);
-			$this->_ssh = new Net_SSH2($this->_hostname);
-			$this->_ssh->setTimeout(3);
 			$this->connected = true;
 			return true;
 		}
