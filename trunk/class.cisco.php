@@ -27,54 +27,151 @@
 
 	class cisco
 	{
-		public $connected;
-		public $autoconnect;
+		public $autoconnect = true;		// Sets whether or not exec() will automatically connect() if needed
+		public $min_timeout = 300;		// sets a minimum timeout, 0 or false to disable
+		public $connected = false;		// True/False Wether or not you are currently connected
 		
-		private $_hostname;
-		private $_username;
-		private $_password;
-		private $_port;
-		
-		private $_ssh;
-		private $_prompt;
-		private $_stream;
-		private $_data;
-		private $_response;
+		private $_hostname;				// SSH Connection Hostname
+		private $_username;				// SSH Connection Username
+		private $_password;				// SSH Connection Password
+		private $_port;					// SSH Connection Port 
+		private $_motd;					// MOTD / Message of the day / Banner
+		private $_prompt;				// Prompt
+		private $_ssh;					// SSH Connection Resource
+		private $_stream;				// Data Stream
+		private $_data;					// Formatted Response
+		private $_response;				// Raw Response
 		
 		public function __construct($hostname, $username, $password, $port = 22)
 		{
-			$this->autoconnect = true;
-			$this->connected = false;
 			$this->_hostname = $hostname;
 			$this->_username = $username;
 			$this->_password = $password;
 			$this->_port = $port;
-			ini_set('default_socket_timeout', 300);
+			if ($this->min_timeout && ini_get('default_socket_timeout') < $this->min_timeout)
+				ini_set('default_socket_timeout', $this->min_timeout);
+		}
+		
+		public function _string_shift(&$string, $index = 1)
+		{
+			$substr = substr($string, 0, $index);
+			$string = substr($string, $index);
+			return $substr;
+		}
+
+		/**
+		 * Returns the output of an interactive shell
+		 *
+		 * Gathers output from a shell until $pattern is met, Pattern is a regular string 
+		 * unless $regex = true, then it matchs it with preg_match as a regular expression.
+		 *
+		 * @param $pattern string the string or the pattern to match
+		 * @param $regex bool Wether or not we are tryign to match a regex pattern or just a simple string
+		 * @return String
+		 * @access public
+		 */
+		function read($pattern = '', $regex = false)
+		{
+			usleep(1000);
+			$this->_response = '';
+			$match = $pattern;
+			while (true) {
+				if ($regex) {
+					preg_match($pattern, $this->_response, $matches);
+					$match = isset($matches[0]) ? $matches[0] : array();
+				}
+				$pos = !empty($match) ? strpos($this->_response, $match) : false;
+				if ($pos !== false)
+					return $this->_string_shift($this->_response, $pos + strlen($pattern));
+				$response = fgets($this->_stream);
+				if (is_bool($response))
+					return $response ? $this->_string_shift($this->_response, strlen($this->_response)) : false;
+				$this->_response .= $response;
+			}
 		}
 		
 		public function connect()
 		{
-			$this->_ssh = ssh2_connect($this->hostname, $this->_port);
+			//echo "Connecting to " . $this->_hostname . "<br>";
+			$this->_ssh = ssh2_connect($this->_hostname, $this->_port);
 			if ($this->_ssh === false) {
 				return false;
 			}
 			ssh2_auth_password($this->_ssh, $this->_username, $this->_password);
+			$this->_stream = ssh2_shell($this->_ssh);
 			$this->connected = true;
 			return true;
+		}
+		
+		public function parse_motd_and_prompt()
+		{
+			sleep(1);
+			$this->_motd = '';
+			while ($this->_response = fgets($this->_stream))
+			{
+				$this->_motd .= $this->_response;
+			}
+			$this->_motd = trim($this->_motd);
+			fwrite($this->_stream, "\n");
+			$this->_response = stream_get_contents($this->_stream);
+			//stream_set_blocking($this->_stream, false);
+			$this->_prompt = trim($this->_response);
+/*			sleep (1);
+			while ($this->_response = fgets($this->_stream))
+			{
+				$this->_prompt .= $this->_response;
+			}
+			$this->_prompt = trim($this->_prompt);*/
+			echo "MOTD:".$this->_motd . "<br>";;
+			echo "Prompt:".$this->_prompt . "<br>";
+			$length = strlen($this->_prompt);
+			if (substr($this->_motd, -$length) == $this->_prompt)
+			{
+				//echo "Found Prompt<br>";
+				$this->_motd = substr($this->_motd, 0, -$length);
+			}
+			//echo "MOTD:".$this->_motd . "<br>";
+			echo "Prompt:".$this->_prompt . "<br>";
+/*			$this->_stream = ssh2_exec($this->_ssh, "#");
+			stream_set_blocking($this->_stream, true);
+			$this->_response = stream_get_contents($this->_stream);
+			$this->_data = $this->_response;
+			stream_set_blocking($this->_stream, false);
+			var_dump($this->_response);
+*/
 		}
 		
 		public function exec($cmd)
 		{
 			if ($this->autoconnect === true && $this->connected === false)
 				$this->connect();
+			if (substr($cmd, -1) != "\n")
+			{
+				//error_log("Adding NEWLINE Character To SSH2 Command $cmd", __LINE__, __FILE__);
+				$cmd .= "\n";				
+			}
 			$this->_data   = false;
-			$this->_stream = ssh2_exec($this->_ssh, $cmd);
-			stream_set_blocking($this->_stream, true);
-			$this->_response = stream_get_contents($this->_stream);
-			$this->_data = $this->response;
-			stream_set_blocking($this->_stream, false);
-			//if (strpos($this->_data, '% Invalid input detected') !== false) $this->_data = false;
-			return $this->_response;
+			fwrite($this->_stream, $cmd);
+			usleep(100);//sleep(1);			
+			//$this->_stream = ssh2_exec($this->_ssh, $cmd);
+			//stream_set_blocking($this->_stream, true);
+			//$this->_response = stream_get_contents($this->_stream);
+			$this->_response = '';
+			while ($line = fgets($this->_stream))
+			{
+				$this->_response .= $line;
+			}
+			$this->_response = trim($this->_response);
+			$length = strlen($this->_prompt);
+			if (substr($this->_response, 0, $length) == $this->_prompt)
+			{
+				//echo "Found Prompt<br>";
+				$this->_response = substr($this->_response, $length);
+			}
+			$this->_data = $this->_response;
+			//stream_set_blocking($this->_stream, false);			
+			//if (strpos($this->_data, '% Invalid input detected') !== false) $this->_data = false;			
+			return $this->_data;
 		}
 		
 		public function get_response()
@@ -84,7 +181,7 @@
 		
 		public function disconnect()
 		{
-			ssh2_exec($this->_ssh, 'quit');
+			//ssh2_exec($this->_ssh, 'quit');
 			$this->connected = false;
 		}
 		
@@ -94,6 +191,26 @@
 				$this->disconnect();
 		}
 		
+		public function show_int_config($int)
+		{
+			// Enabled Only
+			//if (strpos($this->_prompt, '#') === false)
+			//	die('Error: User must be enabled to use show_int_config()' . "\n");
+			$this->exec('show run int ' . $int);
+			return $this->show_int_config_parser();
+		}
+		
+		public function show_int_config_parser()
+		{
+			$this->_data = explode("\r\n", $this->_data);
+			for ($i = 0; $i < 5; $i++)
+				array_shift($this->_data);
+			for ($i = 0; $i < 2; $i++)
+				array_pop($this->_data);
+			$this->_data = implode("\n", $this->_data);
+			return $this->_data;
+		}
+
 		public function show_int_status()
 		{
 			$result = array();
@@ -331,21 +448,6 @@
 				} // if .. elseif
 			} // foreach
 			$this->_data = $result;
-			return $this->_data;
-		}
-		
-		public function show_int_config($int)
-		{
-			// Enabled Only
-			//if (strpos($this->_prompt, '#') === false)
-			//	die('Error: User must be enabled to use show_int_config()' . "\n");
-			$this->exec('show run int ' . $int);
-			$this->_data = explode("\r\n", $this->_data);
-			for ($i = 0; $i < 5; $i++)
-				array_shift($this->_data);
-			for ($i = 0; $i < 2; $i++)
-				array_pop($this->_data);
-			$this->_data = implode("\n", $this->_data);
 			return $this->_data;
 		}
 		
