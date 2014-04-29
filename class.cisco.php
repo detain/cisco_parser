@@ -29,28 +29,32 @@
 	{
 		public $connected;
 		public $autoconnect;
+		
 		private $_hostname;
 		private $_username;
 		private $_password;
+		private $_port;
+		
 		private $_ssh;
 		private $_prompt;
 		private $_stream;
 		private $_data;
 		private $_response;
 		
-		public function __construct($hostname, $username, $password)
+		public function __construct($hostname, $username, $password, $port = 22)
 		{
 			$this->autoconnect = true;
 			$this->connected = false;
 			$this->_hostname = $hostname;
 			$this->_username = $username;
 			$this->_password = $password;
+			$this->_port = $port;
 			ini_set('default_socket_timeout', 300);
 		}
 		
 		public function connect()
 		{
-			$this->_ssh = ssh2_connect($this->hostname, 22);
+			$this->_ssh = ssh2_connect($this->hostname, $this->_port);
 			if ($this->_ssh === false) {
 				return false;
 			}
