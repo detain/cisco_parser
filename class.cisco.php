@@ -42,6 +42,12 @@
 		private $_data; // Formatted Response
 		private $_response; // Raw Response
 
+		/**
+		 * @param     $hostname
+		 * @param     $username
+		 * @param     $password
+		 * @param int $port
+		 */
 		public function __construct($hostname, $username, $password, $port = 22)
 		{
 			$this->_hostname = $hostname;
@@ -52,6 +58,11 @@
 				ini_set('default_socket_timeout', $this->min_timeout);
 		}
 
+		/**
+		 * @param     $string
+		 * @param int $index
+		 * @return string
+		 */
 		public function _string_shift(&$string, $index = 1)
 		{
 			$substr = substr($string, 0, $index);
@@ -106,11 +117,17 @@
 			return $this->_response;
 		}
 
+		/**
+		 * @param $cmd
+		 */
 		public function write($cmd)
 		{
 			fwrite($this->_stream, $cmd);
 		}
 
+		/**
+		 * @return bool
+		 */
 		public function connect()
 		{
 			//echo "Connecting to " . $this->_hostname . "<br>";
@@ -175,6 +192,10 @@
 			*/
 		}
 
+		/**
+		 * @param $cmd
+		 * @return string
+		 */
 		public function exec($cmd)
 		{
 			if ($this->autoconnect === true && $this->connected === false)
@@ -216,6 +237,10 @@
 				$this->disconnect();
 		}
 
+		/**
+		 * @param $int
+		 * @return string
+		 */
 		public function show_int_config($int)
 		{
 			// Enabled Only
@@ -225,6 +250,9 @@
 			return $this->show_int_config_parser();
 		}
 
+		/**
+		 * @return string
+		 */
 		public function show_int_config_parser()
 		{
 			$this->_data = explode("\r\n", $this->_data);
@@ -236,6 +264,9 @@
 			return $this->_data;
 		}
 
+		/**
+		 * @return array
+		 */
 		public function show_int_status()
 		{
 			$result = array();
@@ -267,6 +298,9 @@
 			return $this->_data;
 		}
 
+		/**
+		 * @return array
+		 */
 		public function show_log()
 		{
 			// Enabled Only
@@ -294,6 +328,10 @@
 			return $this->_data;
 		}
 
+		/**
+		 * @param $int
+		 * @return array
+		 */
 		public function show_int($int)
 		{
 			$result = array();
@@ -526,6 +564,9 @@
 			return $this->_data;
 		}
 
+		/**
+		 * @return array
+		 */
 		public function trunk_ports()
 		{
 			$result = array();
@@ -545,6 +586,9 @@
 			return $this->_data;
 		}
 
+		/**
+		 * @return array
+		 */
 		public function vlans()
 		{
 			$result = array();
@@ -565,6 +609,9 @@
 			return $this->_data;
 		}
 
+		/**
+		 * @return array
+		 */
 		public function errdisabled()
 		{
 			$result = array();
@@ -593,6 +640,9 @@
 			return $this->_data;
 		}
 
+		/**
+		 * @return array
+		 */
 		public function dhcpsnoop_bindings()
 		{
 			$result = array();
@@ -617,6 +667,9 @@
 			return $this->_data;
 		}
 
+		/**
+		 * @return array
+		 */
 		public function mac_address_table()
 		{
 			$result = array();
@@ -643,6 +696,9 @@
 			return $this->_data;
 		}
 
+		/**
+		 * @return array
+		 */
 		public function arp_table()
 		{
 			$result = array();
@@ -670,6 +726,9 @@
 			return $this->_data;
 		}
 
+		/**
+		 * @return array
+		 */
 		public function ipv6_neighbor_table()
 		{
 			$result = array();
@@ -693,6 +752,9 @@
 			return $this->_data;
 		}
 
+		/**
+		 * @return array
+		 */
 		public function ipv6_routers()
 		{
 			$result = array();
@@ -719,6 +781,9 @@
 			return $this->_data;
 		}
 
+		/**
+		 * @param $config
+		 */
 		public function configure($config)
 		{
 			// USE AT OWN RISK: This function will apply configuration statements to a device.
@@ -743,6 +808,9 @@
 				die('Error: Switch rejected configuration: ' . "\n" . $config . "\n");
 		}
 
+		/**
+		 * @return bool
+		 */
 		public function write_config()
 		{
 			$this->exec('write');
@@ -753,8 +821,16 @@
 		}
 	}
 
+	/**
+	 * Class cisco_pasrser
+	 */
 	class cisco_pasrser
 	{
+		/**
+		 * @param $lines
+		 * @param $x
+		 * @return int
+		 */
 		function get_space_depth($lines, $x)
 		{
 			if (preg_match('/^(?P<spaces>\s+)*(?P<rest>\S.*)$/', $lines[$x], $matches))
@@ -768,6 +844,12 @@
 			return $cdepth;
 		}
 
+		/**
+		 * @param     $lines
+		 * @param int $x
+		 * @param int $depth
+		 * @return array
+		 */
 		function parse_cisco_children($lines, $x = 0, $depth = 0)
 		{
 			//global $x;
