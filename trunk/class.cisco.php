@@ -3,14 +3,14 @@
 	 * CISCO Switch Interface Class
 	 *
 	 * Basically this is a wrapper to do and parse things from IOS.
-	 * 
+	 *
 	 * Links I might find helpful in improving this class:
 	 * 	http://www.networker.gr/index.php/2011/03/parsing-the-cisco-ios-configuration/
 	 * 	http://technologyordie.com/parsing-cisco-show-command-output
-	 * 	http://packetpushers.net/rocking-your-show-commands-with-regex/  
-	 * 
-	 * Based on code from http://www.soucy.org/project/cisco/ 
-	 * 
+	 * 	http://packetpushers.net/rocking-your-show-commands-with-regex/
+	 *
+	 * Based on code from http://www.soucy.org/project/cisco/
+	 *
 	 * Last Changed: $LastChangedDate$
 	 * @author $Author$
 	 * @version $Revision$
@@ -21,25 +21,64 @@
 
 	/**
 	 * cisco
-	 * 
+	 *
 	 * @access public
 	 */
 
 	class cisco
 	{
+		/**
+		 * @var bool
+		 */
 		public $autoconnect = true; // Sets whether or not exec() will automatically connect() if needed
+		/**
+		 * @var int
+		 */
 		public $min_timeout = 300; // sets a minimum timeout, 0 or false to disable
+		/**
+		 * @var bool
+		 */
 		public $connected = false; // True/False Wether or not you are currently connected
 
+		/**
+		 * @var
+		 */
 		private $_hostname; // SSH Connection Hostname
+		/**
+		 * @var
+		 */
 		private $_username; // SSH Connection Username
+		/**
+		 * @var
+		 */
 		private $_password; // SSH Connection Password
+		/**
+		 * @var int
+		 */
 		private $_port; // SSH Connection Port
+		/**
+		 * @var
+		 */
 		private $_motd; // MOTD / Message of the day / Banner
+		/**
+		 * @var
+		 */
 		private $_prompt; // Prompt
+		/**
+		 * @var
+		 */
 		private $_ssh; // SSH Connection Resource
+		/**
+		 * @var
+		 */
 		private $_stream; // Data Stream
+		/**
+		 * @var
+		 */
 		private $_data; // Formatted Response
+		/**
+		 * @var
+		 */
 		private $_response; // Raw Response
 
 		/**
@@ -73,7 +112,7 @@
 		/**
 		 * Returns the output of an interactive shell
 		 *
-		 * Gathers output from a shell until $pattern is met, Pattern is a regular string 
+		 * Gathers output from a shell until $pattern is met, Pattern is a regular string
 		 * unless $regex = true, then it matchs it with preg_match as a regular expression.
 		 *
 		 * @param $pattern string the string or the pattern to match
@@ -143,6 +182,9 @@
 			return true;
 		}
 
+		/**
+		 *
+		 */
 		public function parse_motd_and_prompt()
 		{
 			$this->_motd = trim($this->read('/.*[>|#]/', true));
@@ -220,17 +262,26 @@
 			return $this->_data;
 		}
 
+		/**
+		 * @return mixed
+		 */
 		public function get_response()
 		{
 			return $this->_response;
 		}
 
+		/**
+		 *
+		 */
 		public function disconnect()
 		{
 			//ssh2_exec($this->_ssh, 'quit');
 			$this->connected = false;
 		}
 
+		/**
+		 *
+		 */
 		public function __destruct()
 		{
 			if ($this->connected === true)
@@ -783,6 +834,7 @@
 
 		/**
 		 * @param $config
+		 * @return bool
 		 */
 		public function configure($config)
 		{
