@@ -12,7 +12,7 @@
 	 * Based on code from http://www.soucy.org/project/cisco/
 	 *
 	 * Last Changed: $LastChangedDate$
-	 * @author $Author$
+	 * @author detain
 	 * @version $Revision$
 	 * @copyright 2015
 	 * @package MyAdmin
