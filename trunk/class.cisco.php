@@ -87,8 +87,7 @@
 		 * @param     $password
 		 * @param int $port
 		 */
-		public function __construct($hostname, $username, $password, $port = 22)
-		{
+		public function __construct($hostname, $username, $password, $port = 22) {
 			$this->_hostname = $hostname;
 			$this->_username = $username;
 			$this->_password = $password;
@@ -102,8 +101,7 @@
 		 * @param int $index
 		 * @return string
 		 */
-		public function _string_shift(&$string, $index = 1)
-		{
+		public function _string_shift(&$string, $index = 1) {
 			$substr = substr($string, 0, $index);
 			$string = substr($string, $index);
 			return $substr;
@@ -120,32 +118,27 @@
 		 * @return String
 		 * @access public
 		 */
-		public function read($pattern = '', $regex = false)
-		{
+		public function read($pattern = '', $regex = false) {
 			//usleep(1000);
 			$this->_response = '';
 			$match = $pattern;
 			$i = 0;
-			while (!feof($this->_stream))
-			{
-				if ($regex)
-				{
+			while (!feof($this->_stream)) {
+				if ($regex) {
 					preg_match($pattern, $this->_response, $matches);
 					//echo 'M:'.print_r($matches, true) . '<br>';
 					$match = isset($matches[0]) ? $matches[0] : array();
 				}
 				$pos = !empty($match) ? strpos($this->_response, $match) : false;
 				//echo ++$i . "POS:".var_export($pos, true).'<br>';
-				if ($pos !== false)
-				{
+				if ($pos !== false) {
 					//echo "$match Matching $pattern @ $pos <br>";
 					return $this->_string_shift($this->_response, $pos + strlen($match));
 				}
 				usleep(1000);
 				$response = fgets($this->_stream);
 				//echo "R$i:$response<br>";
-				if (is_bool($response))
-				{
+				if (is_bool($response)) {
 					//echo "Return B $response::".$this->_response."<br>";
 					//					return $response ? $this->_string_shift($this->_response, strlen($this->_response)) : false;
 				}
@@ -159,20 +152,17 @@
 		/**
 		 * @param $cmd
 		 */
-		public function write($cmd)
-		{
+		public function write($cmd) {
 			fwrite($this->_stream, $cmd);
 		}
 
 		/**
 		 * @return bool
 		 */
-		public function connect()
-		{
+		public function connect() {
 			//echo "Connecting to " . $this->_hostname . "<br>";
 			$this->_ssh = ssh2_connect($this->_hostname, $this->_port);
-			if ($this->_ssh === false)
-			{
+			if ($this->_ssh === false) {
 				return false;
 			}
 			ssh2_auth_password($this->_ssh, $this->_username, $this->_password);
@@ -185,8 +175,7 @@
 		/**
 		 *
 		 */
-		public function parse_motd_and_prompt()
-		{
+		public function parse_motd_and_prompt() {
 			$this->_motd = trim($this->read('/.*[>|#]/', true));
 			$this->write("\n");
 			$this->_prompt = trim($this->read('/.*[>|#]/', true));
@@ -199,8 +188,7 @@
 
 			sleep(1);
 			$this->_motd = '';
-			while ($this->_response = fgets($this->_stream))
-			{
+			while ($this->_response = fgets($this->_stream)) {
 				$this->_motd .= $this->_response;
 			}
 			$this->_motd = trim($this->_motd);
@@ -209,8 +197,7 @@
 			//stream_set_blocking($this->_stream, false);
 			$this->_prompt = trim($this->_response);
 			/*			sleep (1);
-			while ($this->_response = fgets($this->_stream))
-			{
+			while ($this->_response = fgets($this->_stream)) {
 			$this->_prompt .= $this->_response;
 			}
 			$this->_prompt = trim($this->_prompt);*/
@@ -218,8 +205,7 @@
 			;
 			echo "Prompt:" . $this->_prompt . "<br>";
 			$length = strlen($this->_prompt);
-			if (substr($this->_motd, -$length) == $this->_prompt)
-			{
+			if (substr($this->_motd, -$length) == $this->_prompt) {
 				//echo "Found Prompt<br>";
 				$this->_motd = substr($this->_motd, 0, -$length);
 			}
@@ -238,12 +224,10 @@
 		 * @param $cmd
 		 * @return string
 		 */
-		public function exec($cmd)
-		{
+		public function exec($cmd) {
 			if ($this->autoconnect === true && $this->connected === false)
 				$this->connect();
-			if (substr($cmd, -1) != "\n")
-			{
+			if (substr($cmd, -1) != "\n") {
 				//error_log("Adding NEWLINE Character To SSH2 Command $cmd", __LINE__, __FILE__);
 				$cmd .= "\n";
 			}
@@ -251,8 +235,7 @@
 			fwrite($this->_stream, $cmd);
 			$this->_response = trim($this->read($this->_prompt));
 			$length = strlen($this->_prompt);
-			if (substr($this->_response, -$length) == $this->_prompt)
-			{
+			if (substr($this->_response, -$length) == $this->_prompt) {
 				//echo "Found Prompt<br>";
 				$this->_response = substr($this->_response, 0, -$length);
 			}
@@ -265,16 +248,14 @@
 		/**
 		 * @return mixed
 		 */
-		public function get_response()
-		{
+		public function get_response() {
 			return $this->_response;
 		}
 
 		/**
 		 *
 		 */
-		public function disconnect()
-		{
+		public function disconnect() {
 			//ssh2_exec($this->_ssh, 'quit');
 			$this->connected = false;
 		}
@@ -282,8 +263,7 @@
 		/**
 		 *
 		 */
-		public function __destruct()
-		{
+		public function __destruct() {
 			if ($this->connected === true)
 				$this->disconnect();
 		}
@@ -292,8 +272,7 @@
 		 * @param $int
 		 * @return string
 		 */
-		public function show_int_config($int)
-		{
+		public function show_int_config($int) {
 			// Enabled Only
 			//if (strpos($this->_prompt, '#') === false)
 			//	die('Error: User must be enabled to use show_int_config()' . "\n");
@@ -304,8 +283,7 @@
 		/**
 		 * @return string
 		 */
-		public function show_int_config_parser()
-		{
+		public function show_int_config_parser() {
 			$this->_data = explode("\r\n", $this->_data);
 			for ($i = 0; $i < 5; $i++)
 				array_shift($this->_data);
@@ -318,8 +296,7 @@
 		/**
 		 * @return array
 		 */
-		public function show_int_status()
-		{
+		public function show_int_status() {
 			$result = array();
 			$this->exec('show int status');
 			$this->_data = explode("\r\n", $this->_data);
@@ -327,11 +304,9 @@
 				array_shift($this->_data);
 			array_pop($this->_data);
 			$pos = strpos($this->_data[0], "Status");
-			foreach ($this->_data as $entry)
-			{
+			foreach ($this->_data as $entry) {
 				$temp = trim($entry);
-				if (strlen($temp) > 1 && $temp[2] != 'r' && $temp[0] != '-')
-				{
+				if (strlen($temp) > 1 && $temp[2] != 'r' && $temp[0] != '-') {
 					$entry = array();
 					$entry['interface'] = substr($temp, 0, strpos($temp, ' '));
 					$entry['description'] = trim(substr($temp, strpos($temp, ' ') + 1, $pos - strlen($entry['interface']) - 1));
@@ -352,8 +327,7 @@
 		/**
 		 * @return array
 		 */
-		public function show_log()
-		{
+		public function show_log() {
 			// Enabled Only
 			if (strpos($this->_prompt, '#') === false)
 				die('Error: User must be enabled to use show_log()' . "\n");
@@ -362,8 +336,7 @@
 			$this->_data = explode("\r\n", $this->_data);
 			array_shift($this->_data);
 			array_pop($this->_data);
-			foreach ($this->_data as $entry)
-			{
+			foreach ($this->_data as $entry) {
 				$temp = trim($entry);
 				$entry = array();
 				$entry['timestamp'] = substr($temp, 0, strpos($temp, '%') - 2);
@@ -383,37 +356,25 @@
 		 * @param $int
 		 * @return array
 		 */
-		public function show_int($int)
-		{
+		public function show_int($int) {
 			$result = array();
 			$this->exec('show int ' . $int);
 			$this->_data = explode("\r\n", $this->_data);
-			foreach ($this->_data as $entry)
-			{
+			foreach ($this->_data as $entry) {
 				$entry = trim($entry);
-				if (strpos($entry, 'line protocol') !== false)
-				{
+				if (strpos($entry, 'line protocol') !== false) {
 					$result['interface'] = substr($entry, 0, strpos($entry, ' '));
-					if (strpos($entry, 'administratively') !== false)
-					{
+					if (strpos($entry, 'administratively') !== false) {
 						$result['status'] = 'disabled';
-					}
-					elseif (substr($entry, strpos($entry, 'line protocol') + 17, 2) == 'up')
-					{
+					} elseif (substr($entry, strpos($entry, 'line protocol') + 17, 2) == 'up') {
 						$result['status'] = 'connected';
-					}
-					else
-					{
+					} else {
 						$result['status'] = 'notconnect';
 					} // if .. else
-				}
-				elseif (strpos($entry, 'Description: ') !== false)
-				{
+				} elseif (strpos($entry, 'Description: ') !== false) {
 					$entry = explode(':', $entry);
 					$result['description'] = trim($entry[1]);
-				}
-				elseif (strpos($entry, 'MTU') !== false)
-				{
+				} elseif (strpos($entry, 'MTU') !== false) {
 					$entry = explode(',', $entry);
 					$entry[0] = trim($entry[0]);
 					$entry[0] = explode(' ', $entry[0]);
@@ -424,44 +385,33 @@
 					$entry[2] = trim($entry[2]);
 					$entry[2] = explode(' ', $entry[2]);
 					$result['dly'] = $entry[2][1];
-				}
-				elseif (strpos($entry, 'duplex') !== false)
-				{
+				} elseif (strpos($entry, 'duplex') !== false) {
 					$entry = explode(',', $entry);
 					$entry[0] = trim($entry[0]);
 					$entry[0] = explode(' ', $entry[0]);
 					$entry[0][0] = explode('-', $entry[0][0]);
 					$result['duplex'] = strtolower($entry[0][0][0]);
 					$entry[1] = trim($entry[1]);
-					if (strpos($entry[1], 'Auto') !== false)
-					{
+					if (strpos($entry[1], 'Auto') !== false) {
 						$result['speed'] = 'auto';
-					}
-					else
-					{
+					} else {
 						$result['speed'] = intval($entry[1]);
 					} // if .. else
 					$entry[2] = rtrim($entry[2]);
 					$result['type'] = substr($entry[2], strrpos($entry[2], ' ') + 1);
-				}
-				elseif (strpos($entry, 'input rate') !== false)
-				{
+				} elseif (strpos($entry, 'input rate') !== false) {
 					$entry = explode(',', $entry);
 					$result['in_rate'] = substr($entry[0], strpos($entry[0], 'rate') + 5, strrpos($entry[0], ' ') - (strpos($entry[0], 'rate') + 5));
 					$entry = trim($entry[1]);
 					$entry = explode(' ', $entry);
 					$result['in_packet_rate'] = $entry[0];
-				}
-				elseif (strpos($entry, 'output rate') !== false)
-				{
+				} elseif (strpos($entry, 'output rate') !== false) {
 					$entry = explode(',', $entry);
 					$result['out_rate'] = substr($entry[0], strpos($entry[0], 'rate') + 5, strrpos($entry[0], ' ') - (strpos($entry[0], 'rate') + 5));
 					$entry = trim($entry[1]);
 					$entry = explode(' ', $entry);
 					$result['out_packet_rate'] = $entry[0];
-				}
-				elseif (strpos($entry, 'packets input') !== false)
-				{
+				} elseif (strpos($entry, 'packets input') !== false) {
 					$entry = explode(',', $entry);
 					$entry[0] = trim($entry[0]);
 					$entry[0] = explode(' ', $entry[0]);
@@ -469,21 +419,17 @@
 					$entry[1] = trim($entry[1]);
 					$entry[1] = explode(' ', $entry[1]);
 					$result['in'] = $entry[1][0];
-					if (count($entry) > 2)
-					{
+					if (count($entry) > 2) {
 						$entry[2] = trim($entry[2]);
 						$entry[2] = explode(' ', $entry[2]);
 						$result['no_buffer'] = $entry[2][0];
 					} // if
-				}
-				elseif (strpos($entry, 'Received') !== false)
-				{
+				} elseif (strpos($entry, 'Received') !== false) {
 					$entry = explode(',', $entry);
 					$entry[0] = trim($entry[0]);
 					$entry[0] = explode(' ', $entry[0]);
 					$result['broadcast'] = $entry[0][1];
-					if (count($entry) > 1)
-					{
+					if (count($entry) > 1) {
 						$entry[1] = trim($entry[1]);
 						$entry[1] = explode(' ', $entry[1]);
 						$result['runt'] = $entry[1][0];
@@ -494,9 +440,7 @@
 						$entry[3] = explode(' ', $entry[3]);
 						$result['throttle'] = $entry[3][0];
 					} // if
-				}
-				elseif (strpos($entry, 'CRC') !== false)
-				{
+				} elseif (strpos($entry, 'CRC') !== false) {
 					$entry = explode(',', $entry);
 					$entry[0] = trim($entry[0]);
 					$entry[0] = explode(' ', $entry[0]);
@@ -513,9 +457,7 @@
 					$entry[4] = trim($entry[4]);
 					$entry[4] = explode(' ', $entry[4]);
 					$result['ignored'] = $entry[4][0];
-				}
-				elseif (strpos($entry, 'watchdog') !== false)
-				{
+				} elseif (strpos($entry, 'watchdog') !== false) {
 					$entry = explode(',', $entry);
 					$entry[0] = trim($entry[0]);
 					$entry[0] = explode(' ', $entry[0]);
@@ -523,21 +465,16 @@
 					$entry[1] = trim($entry[1]);
 					$entry[1] = explode(' ', $entry[1]);
 					$result['multicast'] = $entry[1][0];
-					if (count($entry) > 2)
-					{
+					if (count($entry) > 2) {
 						$entry[2] = trim($entry[2]);
 						$entry[2] = explode(' ', $entry[2]);
 						$result['pause_in'] = $entry[2][0];
 					} // if
-				}
-				elseif (strpos($entry, 'dribble') !== false)
-				{
+				} elseif (strpos($entry, 'dribble') !== false) {
 					$entry = trim($entry);
 					$entry = explode(' ', $entry);
 					$result['in_dribble'] = $entry[0];
-				}
-				elseif (strpos($entry, 'packets output') !== false)
-				{
+				} elseif (strpos($entry, 'packets output') !== false) {
 					$entry = explode(',', $entry);
 					$entry[0] = trim($entry[0]);
 					$entry[0] = explode(' ', $entry[0]);
@@ -548,31 +485,24 @@
 					$entry[2] = trim($entry[2]);
 					$entry[2] = explode(' ', $entry[2]);
 					$result['underrun'] = $entry[2][0];
-				}
-				elseif (strpos($entry, 'output errors') !== false)
-				{
+				} elseif (strpos($entry, 'output errors') !== false) {
 					$entry = explode(',', $entry);
 					$entry[0] = trim($entry[0]);
 					$entry[0] = explode(' ', $entry[0]);
 					$result['out_error'] = $entry[0][0];
-					if (count($entry) > 2)
-					{
+					if (count($entry) > 2) {
 						$entry[1] = trim($entry[1]);
 						$entry[1] = explode(' ', $entry[1]);
 						$result['collision'] = $entry[1][0];
 						$entry[2] = trim($entry[2]);
 						$entry[2] = explode(' ', $entry[2]);
 						$result['reset'] = $entry[2][0];
-					}
-					else
-					{
+					} else {
 						$entry[1] = trim($entry[1]);
 						$entry[1] = explode(' ', $entry[1]);
 						$result['reset'] = $entry[1][0];
 					} // if .. else
-				}
-				elseif (strpos($entry, 'babbles') !== false)
-				{
+				} elseif (strpos($entry, 'babbles') !== false) {
 					$entry = explode(',', $entry);
 					$entry[0] = trim($entry[0]);
 					$entry[0] = explode(' ', $entry[0]);
@@ -583,9 +513,7 @@
 					$entry[2] = trim($entry[2]);
 					$entry[2] = explode(' ', $entry[2]);
 					$result['deferred'] = $entry[2][0];
-				}
-				elseif (strpos($entry, 'lost carrier') !== false)
-				{
+				} elseif (strpos($entry, 'lost carrier') !== false) {
 					$entry = explode(',', $entry);
 					$entry[0] = trim($entry[0]);
 					$entry[0] = explode(' ', $entry[0]);
@@ -593,15 +521,12 @@
 					$entry[1] = trim($entry[1]);
 					$entry[1] = explode(' ', $entry[1]);
 					$result['no_carrier'] = $entry[1][0];
-					if (count($entry) > 2)
-					{
+					if (count($entry) > 2) {
 						$entry[2] = trim($entry[2]);
 						$entry[2] = explode(' ', $entry[2]);
 						$result['pause_out'] = $entry[2][0];
 					} // if
-				}
-				elseif (strpos($entry, 'output buffer failures') !== false)
-				{
+				} elseif (strpos($entry, 'output buffer failures') !== false) {
 					$entry = explode(',', $entry);
 					$entry[0] = trim($entry[0]);
 					$entry[0] = explode(' ', $entry[0]);
@@ -618,17 +543,14 @@
 		/**
 		 * @return array
 		 */
-		public function trunk_ports()
-		{
+		public function trunk_ports() {
 			$result = array();
 			$this->exec('show interface status | include trunk');
 			$this->_data = explode("\r\n", $this->_data);
 			array_shift($this->_data);
 			array_pop($this->_data);
-			if (count($this->_data) > 0)
-			{
-				foreach ($this->_data as $interface)
-				{
+			if (count($this->_data) > 0) {
+				foreach ($this->_data as $interface) {
 					$interface = explode(' ', $interface);
 					array_push($result, $interface[0]);
 				} // foreach
@@ -640,17 +562,14 @@
 		/**
 		 * @return array
 		 */
-		public function vlans()
-		{
+		public function vlans() {
 			$result = array();
 			$this->exec('show spanning-tree summary | include ^VLAN');
 			$this->_data = explode("\r\n", $this->_data);
 			array_shift($this->_data);
 			array_pop($this->_data);
-			if (count($this->_data) > 0)
-			{
-				foreach ($this->_data as $vlan)
-				{
+			if (count($this->_data) > 0) {
+				foreach ($this->_data as $vlan) {
 					$vlan = explode(" ", $vlan);
 					$vlan = substr($vlan[0], 4);
 					array_push($result, intval($vlan));
@@ -663,8 +582,7 @@
 		/**
 		 * @return array
 		 */
-		public function errdisabled()
-		{
+		public function errdisabled() {
 			$result = array();
 			$this->exec('show int status err');
 			$this->_data = explode("\r\n", $this->_data);
@@ -672,11 +590,9 @@
 				array_shift($this->_data);
 			array_pop($this->_data);
 			$pos = strpos($this->_data[0], "Status");
-			foreach ($this->_data as $entry)
-			{
+			foreach ($this->_data as $entry) {
 				$temp = trim($entry);
-				if (strlen($temp) > 1 && $temp[2] != 'r')
-				{
+				if (strlen($temp) > 1 && $temp[2] != 'r') {
 					$entry = array();
 					$entry['interface'] = substr($temp, 0, strpos($temp, ' '));
 					$entry['description'] = trim(substr($temp, strpos($temp, ' ') + 1, $pos - strlen($entry['interface']) - 1));
@@ -694,15 +610,13 @@
 		/**
 		 * @return array
 		 */
-		public function dhcpsnoop_bindings()
-		{
+		public function dhcpsnoop_bindings() {
 			$result = array();
 			$this->exec('sh ip dhcp snoop binding | inc dhcp-snooping');
 			$this->_data = explode("\r\n", $this->_data);
 			array_shift($this->_data);
 			array_pop($this->_data);
-			foreach ($this->_data as $entry)
-			{
+			foreach ($this->_data as $entry) {
 				$temp = sscanf($entry, "%s %s %s %s %s %s");
 				$entry = array();
 				$entry['mac_address'] = $temp[0];
@@ -721,8 +635,7 @@
 		/**
 		 * @return array
 		 */
-		public function mac_address_table()
-		{
+		public function mac_address_table() {
 			$result = array();
 			$omit = $this->trunk_ports();
 			$this->exec('show mac address-table | exclude CPU');
@@ -732,14 +645,12 @@
 				array_shift($this->_data);
 			for ($i = 0; $i < 2; $i++)
 				array_pop($this->_data);
-			foreach ($this->_data as $entry)
-			{
+			foreach ($this->_data as $entry) {
 				$temp = sscanf($entry, "%s %s %s %s");
 				$entry = array();
 				$entry['mac_address'] = $temp[1];
 				$entry['interface'] = $temp[3];
-				if (in_array($entry['interface'], $omit) == false)
-				{
+				if (in_array($entry['interface'], $omit) == false) {
 					array_push($result, $entry);
 				} // if
 			} // foreach
@@ -750,16 +661,14 @@
 		/**
 		 * @return array
 		 */
-		public function arp_table()
-		{
+		public function arp_table() {
 			$result = array();
 			$this->exec('show arp | exc Incomplete');
 			$this->_data = explode("\r\n", $this->_data);
 			for ($i = 0; $i < 2; $i++)
 				array_shift($this->_data);
 			array_pop($this->_data);
-			foreach ($this->_data as $entry)
-			{
+			foreach ($this->_data as $entry) {
 				$temp = sscanf($entry, "%s %s %s %s %s %s");
 				$entry = array();
 				$entry['ip'] = $temp[1];
@@ -768,8 +677,7 @@
 					$temp[2] = '0';
 				$entry['age'] = $temp[2];
 				$entry['interface'] = $temp[5];
-				if ($entry['ip'] != 'Address' && $entry['mac_address'] != 'Incomplete')
-				{
+				if ($entry['ip'] != 'Address' && $entry['mac_address'] != 'Incomplete') {
 					array_push($result, $entry);
 				} // if
 			} // foreach
@@ -780,8 +688,7 @@
 		/**
 		 * @return array
 		 */
-		public function ipv6_neighbor_table()
-		{
+		public function ipv6_neighbor_table() {
 			$result = array();
 			$this->exec('show ipv6 neighbors | exc INCMP');
 			$this->_data = explode("\r\n", $this->_data);
@@ -789,8 +696,7 @@
 				array_shift($this->_data);
 			for ($i = 0; $i < 2; $i++)
 				array_pop($this->_data);
-			foreach ($this->_data as $entry)
-			{
+			foreach ($this->_data as $entry) {
 				$temp = sscanf($entry, "%s %s %s %s %s");
 				$entry = array();
 				$entry['ipv6'] = $temp[0];
@@ -806,18 +712,15 @@
 		/**
 		 * @return array
 		 */
-		public function ipv6_routers()
-		{
+		public function ipv6_routers() {
 			$result = array();
 			$this->exec('show ipv6 routers');
 			$this->_data = explode("\r\n", $this->_data);
 			array_shift($this->_data);
 			array_pop($this->_data);
-			for ($i = 0; $i < count($this->_data); $i++)
-			{
+			for ($i = 0; $i < count($this->_data); $i++) {
 				$entry = trim($this->_data[$i]);
-				if (substr($entry, 0, 7) == 'Router ')
-				{
+				if (substr($entry, 0, 7) == 'Router ') {
 					$temp = sscanf($entry, "%s %s %s %s");
 					$entry = array();
 					$entry['router'] = $temp[1];
@@ -836,8 +739,7 @@
 		 * @param $config
 		 * @return bool
 		 */
-		public function configure($config)
-		{
+		public function configure($config) {
 			// USE AT OWN RISK: This function will apply configuration statements to a device.
 			// Enabled Only
 			if (strpos($this->_prompt, '#') === false)
@@ -846,8 +748,7 @@
 			$this->_ssh->write("config t\n");
 			$config_prompt = $this->_ssh->read('/.*[>|#]/', NET_SSH2_READ_REGEX);
 			$config_prompt = str_replace("\r\n", '', trim($config_prompt));
-			if (strpos($config_prompt, 'config)#') !== false)
-			{
+			if (strpos($config_prompt, 'config)#') !== false) {
 				foreach ($this->_data as $c)
 					$this->_ssh->write($c . "\n");
 				$this->_ssh->write("end\n");
@@ -863,8 +764,7 @@
 		/**
 		 * @return bool
 		 */
-		public function write_config()
-		{
+		public function write_config() {
 			$this->exec('write');
 			if (strpos($this->_data, '[OK]') !== false)
 				return true;
@@ -883,14 +783,10 @@
 		 * @param $x
 		 * @return int
 		 */
-		function get_space_depth($lines, $x)
-		{
-			if (preg_match('/^(?P<spaces>\s+)*(?P<rest>\S.*)$/', $lines[$x], $matches))
-			{
+		function get_space_depth($lines, $x) {
+			if (preg_match('/^(?P<spaces>\s+)*(?P<rest>\S.*)$/', $lines[$x], $matches)) {
 				$cdepth = strlen($matches['spaces']);
-			}
-			else
-			{
+			} else {
 				$cdepth = 0;
 			}
 			return $cdepth;
@@ -902,41 +798,34 @@
 		 * @param int $depth
 		 * @return array
 		 */
-		function parse_cisco_children($lines, $x = 0, $depth = 0)
-		{
+		function parse_cisco_children($lines, $x = 0, $depth = 0) {
 			//global $x;
 			$data = array();
 			$last_command = false;
-			for (; $x < sizeof($lines); $x++)
-			{
+			for (; $x < sizeof($lines); $x++) {
 				$cdepth = get_space_depth($lines, $x);
 				$command = ltrim($lines[$x]);
 				$arguments = '';
 				$spacepos = strpos($command, ' ');
-				if ($spacepos !== false)
-				{
+				if ($spacepos !== false) {
 					$arguments = substr($command, $spacepos + 1);
 					$command = substr($command, 0, $spacepos);
 					//echo "Got C|$command|A|$arguments|<br>";
 				}
-				if ($cdepth == $depth)
-				{
+				if ($cdepth == $depth) {
 					$new_data = array('command' => $command);
 					if ($arguments != '')
 						$new_data['argments'] = trim($arguments);
-					if ($x + 1 < sizeof($lines))
-					{
+					if ($x + 1 < sizeof($lines)) {
 						$next_depth = get_space_depth($lines, $x + 1);
-						if ($next_depth > $depth)
-						{
+						if ($next_depth > $depth) {
 							$new_data['children'] = parse_cisco_children($lines, $x + 1, $next_depth);
 							while (get_space_depth($lines, $x + 1) > $depth)
 								++$x;
 						}
 					}
 					$data[] = $new_data;
-				}
-				elseif ($cdepth < $depth)
+				} elseif ($cdepth < $depth)
 					return $data;
 				else
 					echo "SHOULD NEVER GET HERE\n";
