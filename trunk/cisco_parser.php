@@ -17,4 +17,3 @@
 	$x += 3;
 	$info['data'] = parse_cisco_children($lines, $x + 1);
 	print_r($info);
-?>
