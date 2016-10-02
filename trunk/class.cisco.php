@@ -783,7 +783,7 @@
 		 * @param $x
 		 * @return int
 		 */
-		function get_space_depth($lines, $x) {
+		public function get_space_depth($lines, $x) {
 			if (preg_match('/^(?P<spaces>\s+)*(?P<rest>\S.*)$/', $lines[$x], $matches)) {
 				$cdepth = strlen($matches['spaces']);
 			} else {
@@ -798,7 +798,7 @@
 		 * @param int $depth
 		 * @return array
 		 */
-		function parse_cisco_children($lines, $x = 0, $depth = 0) {
+		public function parse_cisco_children($lines, $x = 0, $depth = 0) {
 			//global $x;
 			$data = array();
 			$last_command = false;
