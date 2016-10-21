@@ -815,7 +815,7 @@
 				if ($cdepth == $depth) {
 					$new_data = array('command' => $command);
 					if ($arguments != '')
-						$new_data['argments'] = trim($arguments);
+						$new_data['arguments'] = trim($arguments);
 					if ($x + 1 < sizeof($lines)) {
 						$next_depth = get_space_depth($lines, $x + 1);
 						if ($next_depth > $depth) {
