@@ -38,7 +38,7 @@
 		/**
 		 * @var bool
 		 */
-		public $connected = false; // True/False Wether or not you are currently connected
+		public $connected = false; // True/False Whether or not you are currently connected
 
 		/**
 		 * @var
@@ -114,7 +114,7 @@
 		 * unless $regex = true, then it matches it with preg_match as a regular expression.
 		 *
 		 * @param $pattern string the string or the pattern to match
-		 * @param $regex bool Wether or not we are tryign to match a regex pattern or just a simple string
+		 * @param $regex bool Whether or not we are trying to match a regex pattern or just a simple string
 		 * @return String
 		 * @access public
 		 */
@@ -774,9 +774,9 @@
 	}
 
 	/**
-	 * Class cisco_pasrser
+	 * Class cisco_parser
 	 */
-	class cisco_pasrser
+	class cisco_parser
 	{
 		/**
 		 * @param $lines
