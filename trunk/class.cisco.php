@@ -111,7 +111,7 @@
 		 * Returns the output of an interactive shell
 		 *
 		 * Gathers output from a shell until $pattern is met, Pattern is a regular string
-		 * unless $regex = true, then it matchs it with preg_match as a regular expression.
+		 * unless $regex = true, then it matches it with preg_match as a regular expression.
 		 *
 		 * @param $pattern string the string or the pattern to match
 		 * @param $regex bool Wether or not we are tryign to match a regex pattern or just a simple string
