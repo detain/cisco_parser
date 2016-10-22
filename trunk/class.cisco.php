@@ -311,13 +311,14 @@
 					$entry['interface'] = substr($temp, 0, strpos($temp, ' '));
 					$entry['description'] = trim(substr($temp, strpos($temp, ' ') + 1, $pos - strlen($entry['interface']) - 1));
 					$temp = substr($temp, $pos);
+					/** @noinspection PrintfScanfArgumentsInspection */
 					$temp = sscanf($temp, "%s %s %s %s %s %s");
 					$entry['status'] = $temp[0];
 					$entry['vlan'] = $temp[1];
 					$entry['duplex'] = $temp[2];
 					$entry['speed'] = $temp[3];
 					$entry['type'] = trim($temp[4] . ' ' . $temp[5]);
-					array_push($result, $entry);
+					$result[] = $entry;
 				} // if
 			} // foreach
 			$this->_data = $result;
@@ -346,7 +347,7 @@
 				$entry['type'] = substr($temp, 0, strpos($temp, ':'));
 				$temp = substr($temp, strpos($temp, ':') + 2);
 				$entry['message'] = $temp;
-				array_push($result, $entry);
+				$result[] = $entry;
 			} // foreach
 			$this->_data = $result;
 			return $this->_data;
@@ -395,7 +396,7 @@
 					if (strpos($entry[1], 'Auto') !== false) {
 						$result['speed'] = 'auto';
 					} else {
-						$result['speed'] = intval($entry[1]);
+						$result['speed'] = (int)$entry[1];
 					} // if .. else
 					$entry[2] = rtrim($entry[2]);
 					$result['type'] = substr($entry[2], strrpos($entry[2], ' ') + 1);
@@ -552,7 +553,7 @@
 			if (count($this->_data) > 0) {
 				foreach ($this->_data as $interface) {
 					$interface = explode(' ', $interface);
-					array_push($result, $interface[0]);
+					$result[] = $interface[0];
 				} // foreach
 			} // if
 			$this->_data = $result;
@@ -572,7 +573,7 @@
 				foreach ($this->_data as $vlan) {
 					$vlan = explode(" ", $vlan);
 					$vlan = substr($vlan[0], 4);
-					array_push($result, intval($vlan));
+					$result[] = intval($vlan);
 				} // foreach
 			} // if
 			$this->_data = $result;
@@ -597,10 +598,11 @@
 					$entry['interface'] = substr($temp, 0, strpos($temp, ' '));
 					$entry['description'] = trim(substr($temp, strpos($temp, ' ') + 1, $pos - strlen($entry['interface']) - 1));
 					$temp = substr($temp, $pos);
+					/** @noinspection PrintfScanfArgumentsInspection */
 					$temp = sscanf($temp, "%s %s");
 					$entry['status'] = $temp[0];
 					$entry['reason'] = $temp[1];
-					array_push($result, $entry);
+					$result[] = $entry;
 				} // if
 			} // foreach
 			$this->_data = $result;
@@ -617,6 +619,7 @@
 			array_shift($this->_data);
 			array_pop($this->_data);
 			foreach ($this->_data as $entry) {
+				/** @noinspection PrintfScanfArgumentsInspection */
 				$temp = sscanf($entry, "%s %s %s %s %s %s");
 				$entry = array();
 				$entry['mac_address'] = $temp[0];
@@ -626,7 +629,7 @@
 				$entry['vlan'] = $temp[4];
 				$entry['interface'] = $temp[5];
 				if ($temp[3] == 'dhcp-snooping')
-					array_push($result, $entry);
+					$result[] = $entry;
 			}
 			$this->_data = $result;
 			return $this->_data;
@@ -646,12 +649,13 @@
 			for ($i = 0; $i < 2; $i++)
 				array_pop($this->_data);
 			foreach ($this->_data as $entry) {
+				/** @noinspection PrintfScanfArgumentsInspection */
 				$temp = sscanf($entry, "%s %s %s %s");
 				$entry = array();
 				$entry['mac_address'] = $temp[1];
 				$entry['interface'] = $temp[3];
 				if (in_array($entry['interface'], $omit) == false) {
-					array_push($result, $entry);
+					$result[] = $entry;
 				} // if
 			} // foreach
 			$this->_data = $result;
@@ -669,6 +673,7 @@
 				array_shift($this->_data);
 			array_pop($this->_data);
 			foreach ($this->_data as $entry) {
+				/** @noinspection PrintfScanfArgumentsInspection */
 				$temp = sscanf($entry, "%s %s %s %s %s %s");
 				$entry = array();
 				$entry['ip'] = $temp[1];
@@ -678,7 +683,7 @@
 				$entry['age'] = $temp[2];
 				$entry['interface'] = $temp[5];
 				if ($entry['ip'] != 'Address' && $entry['mac_address'] != 'Incomplete') {
-					array_push($result, $entry);
+					$result[] = $entry;
 				} // if
 			} // foreach
 			$this->_data = $result;
@@ -697,13 +702,14 @@
 			for ($i = 0; $i < 2; $i++)
 				array_pop($this->_data);
 			foreach ($this->_data as $entry) {
+				/** @noinspection PrintfScanfArgumentsInspection */
 				$temp = sscanf($entry, "%s %s %s %s %s");
 				$entry = array();
 				$entry['ipv6'] = $temp[0];
 				$entry['mac_address'] = $temp[2];
 				$entry['age'] = $temp[1];
 				$entry['interface'] = $temp[4];
-				array_push($result, $entry);
+				$result[] = $entry;
 			} // foreach
 			$this->_data = $result;
 			return $this->_data;
@@ -721,14 +727,16 @@
 			for ($i = 0; $i < count($this->_data); $i++) {
 				$entry = trim($this->_data[$i]);
 				if (substr($entry, 0, 7) == 'Router ') {
+					/** @noinspection PrintfScanfArgumentsInspection */
 					$temp = sscanf($entry, "%s %s %s %s");
 					$entry = array();
 					$entry['router'] = $temp[1];
 					$entry['interface'] = str_replace(',', '', $temp[3]);
+					/** @noinspection PrintfScanfArgumentsInspection */
 					$temp = sscanf(trim($this->_data[$i + 4]), "%s %s %s");
 					$entry['prefix'] = $temp[1];
 					$i = $i + 5;
-					array_push($result, $entry);
+					$result[] = $entry;
 				} // if
 			} // for
 			$this->_data = $result;
