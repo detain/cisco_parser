@@ -4,7 +4,7 @@
 	if (!isset($_SERVER['argv'][1]) || !file_exists($_SERVER['argv'][1])) {
 		die('Specify a (valid) file as the first argument to get it parsed');
 	}
-	$file = str_replace("\r", "", file_get_contents($_SERVER['argv'][1]));
+	$file = str_replace("\r", '', file_get_contents($_SERVER['argv'][1]));
 	$lines = explode("\n", $file);
 	$start_str = 'Building configuration...';
 	$x = 0;
