@@ -714,7 +714,7 @@ class cisco {
 		$this->_data = explode("\r\n", $this->_data);
 		array_shift($this->_data);
 		array_pop($this->_data);
-		for ($i = 0; $i < count($this->_data); $i++) {
+		for ($i = 0, $iMax = count($this->_data); $i < $iMax; $i++) {
 			$entry = trim($this->_data[$i]);
 			if (substr($entry, 0, 7) == 'Router ') {
 				/** @noinspection PrintfScanfArgumentsInspection */
@@ -797,7 +797,7 @@ class cisco_parser {
 		//global $x;
 		$data = array();
 		$last_command = false;
-		for (; $x < sizeof($lines); $x++) {
+		for ($xMax = sizeof($lines); $x < $xMax; $x++) {
 			$cdepth = get_space_depth($lines, $x);
 			$command = ltrim($lines[$x]);
 			$arguments = '';
