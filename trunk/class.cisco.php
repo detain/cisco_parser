@@ -767,12 +767,14 @@ class cisco {
 			return true; else
 			return false;
 	}
+
 }
 
 /**
  * Class cisco_parser
  */
 class cisco_parser {
+
 	/**
 	 * @param $lines
 	 * @param $x
@@ -827,4 +829,5 @@ class cisco_parser {
 		}
 		return $data;
 	}
+
 }
