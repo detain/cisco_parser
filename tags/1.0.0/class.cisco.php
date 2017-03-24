@@ -96,8 +96,8 @@ class cisco {
 	 * @return string
 	 */
 	public function _string_shift(&$string, $index = 1) {
-		$substr = substr($string, 0, $index);
-		$string = substr($string, $index);
+		$substr = mb_substr($string, 0, $index);
+		$string = mb_substr($string, $index);
 		return $substr;
 	}
 
@@ -122,18 +122,18 @@ class cisco {
 				//echo 'M:'.print_r($matches, true) . '<br>';
 				$match = isset($matches[0]) ? $matches[0] : array();
 			}
-			$pos = !empty($match) ? strpos($this->_response, $match) : false;
+			$pos = !empty($match) ? mb_strpos($this->_response, $match) : false;
 			//echo ++$i . "POS:".var_export($pos, true).'<br>';
 			if ($pos !== false) {
 				//echo "$match Matching $pattern @ $pos <br>";
-				return $this->_string_shift($this->_response, $pos + strlen($match));
+				return $this->_string_shift($this->_response, $pos + mb_strlen($match));
 			}
 			usleep(1000);
 			$response = fgets($this->_stream);
 			//echo "R$i:$response<br>";
 			if (is_bool($response)) {
 				//echo "Return B $response::".$this->_response."<br>";
-				//					return $response ? $this->_string_shift($this->_response, strlen($this->_response)) : false;
+				//					return $response ? $this->_string_shift($this->_response, mb_strlen($this->_response)) : false;
 			}
 			$this->_response .= $response;
 		}
@@ -171,9 +171,9 @@ class cisco {
 		$this->_motd = trim($this->read('/.*[>|#]/', true));
 		$this->write("\n");
 		$this->_prompt = trim($this->read('/.*[>|#]/', true));
-		$length = strlen($this->_prompt);
-		if (substr($this->_motd, -$length) == $this->_prompt)
-			$this->_motd = substr($this->_motd, 0, -$length);
+		$length = mb_strlen($this->_prompt);
+		if (mb_substr($this->_motd, -$length) == $this->_prompt)
+			$this->_motd = mb_substr($this->_motd, 0, -$length);
 		//echo "MOTD:".$this->_motd."<br>";
 		//echo "Prompt:".$this->_prompt.'<br>';
 		return true;
@@ -194,10 +194,10 @@ class cisco {
 		$this->_prompt = trim($this->_prompt);*/
 		echo 'MOTD:' . $this->_motd . '<br>';
 		echo 'Prompt:' . $this->_prompt . '<br>';
-		$length = strlen($this->_prompt);
-		if (substr($this->_motd, -$length) == $this->_prompt) {
+		$length = mb_strlen($this->_prompt);
+		if (mb_substr($this->_motd, -$length) == $this->_prompt) {
 			//echo "Found Prompt<br>";
-			$this->_motd = substr($this->_motd, 0, -$length);
+			$this->_motd = mb_substr($this->_motd, 0, -$length);
 		}
 		//echo "MOTD:".$this->_motd . "<br>";
 		echo 'Prompt:' . $this->_prompt . '<br>';
@@ -217,21 +217,21 @@ class cisco {
 	public function exec($cmd) {
 		if ($this->autoconnect === true && $this->connected === false)
 			$this->connect();
-		if (substr($cmd, -1) != "\n") {
+		if (mb_substr($cmd, -1) != "\n") {
 			//error_log("Adding NEWLINE Character To SSH2 Command $cmd", __LINE__, __FILE__);
 			$cmd .= "\n";
 		}
 		$this->_data = false;
 		fwrite($this->_stream, $cmd);
 		$this->_response = trim($this->read($this->_prompt));
-		$length = strlen($this->_prompt);
-		if (substr($this->_response, -$length) == $this->_prompt) {
+		$length = mb_strlen($this->_prompt);
+		if (mb_substr($this->_response, -$length) == $this->_prompt) {
 			//echo "Found Prompt<br>";
-			$this->_response = substr($this->_response, 0, -$length);
+			$this->_response = mb_substr($this->_response, 0, -$length);
 		}
 		$this->_data = $this->_response;
 		//stream_set_blocking($this->_stream, false);
-		//if (strpos($this->_data, '% Invalid input detected') !== false) $this->_data = false;
+		//if (mb_strpos($this->_data, '% Invalid input detected') !== false) $this->_data = false;
 		return $this->_data;
 	}
 
@@ -264,7 +264,7 @@ class cisco {
 	 */
 	public function show_int_config($int) {
 		// Enabled Only
-		//if (strpos($this->_prompt, '#') === false)
+		//if (mb_strpos($this->_prompt, '#') === false)
 		//	die('Error: User must be enabled to use show_int_config()' . "\n");
 		$this->exec('show run int ' . $int);
 		return $this->show_int_config_parser();
@@ -293,14 +293,14 @@ class cisco {
 		for ($i = 0; $i < 2; $i++)
 			array_shift($this->_data);
 		array_pop($this->_data);
-		$pos = strpos($this->_data[0], 'Status');
+		$pos = mb_strpos($this->_data[0], 'Status');
 		foreach ($this->_data as $entry) {
 			$temp = trim($entry);
-			if (strlen($temp) > 1 && $temp[2] != 'r' && $temp[0] != '-') {
+			if (mb_strlen($temp) > 1 && $temp[2] != 'r' && $temp[0] != '-') {
 				$entry = array();
-				$entry['interface'] = substr($temp, 0, strpos($temp, ' '));
-				$entry['description'] = trim(substr($temp, strpos($temp, ' ') + 1, $pos - strlen($entry['interface']) - 1));
-				$temp = substr($temp, $pos);
+				$entry['interface'] = mb_substr($temp, 0, mb_strpos($temp, ' '));
+				$entry['description'] = trim(mb_substr($temp, mb_strpos($temp, ' ') + 1, $pos - mb_strlen($entry['interface']) - 1));
+				$temp = mb_substr($temp, $pos);
 				/** @noinspection PrintfScanfArgumentsInspection */
 				$temp = sscanf($temp, '%s %s %s %s %s %s');
 				$entry['status'] = $temp[0];
@@ -320,7 +320,7 @@ class cisco {
 	 */
 	public function show_log() {
 		// Enabled Only
-		if (strpos($this->_prompt, '#') === false)
+		if (mb_strpos($this->_prompt, '#') === false)
 			die('Error: User must be enabled to use show_log()' . "\n");
 		$result = array();
 		$this->exec('sh log | inc %');
@@ -330,12 +330,12 @@ class cisco {
 		foreach ($this->_data as $entry) {
 			$temp = trim($entry);
 			$entry = array();
-			$entry['timestamp'] = substr($temp, 0, strpos($temp, '%') - 2);
+			$entry['timestamp'] = mb_substr($temp, 0, mb_strpos($temp, '%') - 2);
 			if ($entry['timestamp'][0] == '.' || $entry['timestamp'][0] == '*')
-				$entry['timestamp'] = substr($entry['timestamp'], 1);
-			$temp = substr($temp, strpos($temp, '%') + 1);
-			$entry['type'] = substr($temp, 0, strpos($temp, ':'));
-			$temp = substr($temp, strpos($temp, ':') + 2);
+				$entry['timestamp'] = mb_substr($entry['timestamp'], 1);
+			$temp = mb_substr($temp, mb_strpos($temp, '%') + 1);
+			$entry['type'] = mb_substr($temp, 0, mb_strpos($temp, ':'));
+			$temp = mb_substr($temp, mb_strpos($temp, ':') + 2);
 			$entry['message'] = $temp;
 			$result[] = $entry;
 		} // foreach
@@ -353,19 +353,19 @@ class cisco {
 		$this->_data = explode("\r\n", $this->_data);
 		foreach ($this->_data as $entry) {
 			$entry = trim($entry);
-			if (strpos($entry, 'line protocol') !== false) {
-				$result['interface'] = substr($entry, 0, strpos($entry, ' '));
-				if (strpos($entry, 'administratively') !== false) {
+			if (mb_strpos($entry, 'line protocol') !== false) {
+				$result['interface'] = mb_substr($entry, 0, mb_strpos($entry, ' '));
+				if (mb_strpos($entry, 'administratively') !== false) {
 					$result['status'] = 'disabled';
-				} elseif (substr($entry, strpos($entry, 'line protocol') + 17, 2) == 'up') {
+				} elseif (mb_substr($entry, mb_strpos($entry, 'line protocol') + 17, 2) == 'up') {
 					$result['status'] = 'connected';
 				} else {
 					$result['status'] = 'notconnect';
 				} // if .. else
-			} elseif (strpos($entry, 'Description: ') !== false) {
+			} elseif (mb_strpos($entry, 'Description: ') !== false) {
 				$entry = explode(':', $entry);
 				$result['description'] = trim($entry[1]);
-			} elseif (strpos($entry, 'MTU') !== false) {
+			} elseif (mb_strpos($entry, 'MTU') !== false) {
 				$entry = explode(',', $entry);
 				$entry[0] = trim($entry[0]);
 				$entry[0] = explode(' ', $entry[0]);
@@ -376,33 +376,33 @@ class cisco {
 				$entry[2] = trim($entry[2]);
 				$entry[2] = explode(' ', $entry[2]);
 				$result['dly'] = $entry[2][1];
-			} elseif (strpos($entry, 'duplex') !== false) {
+			} elseif (mb_strpos($entry, 'duplex') !== false) {
 				$entry = explode(',', $entry);
 				$entry[0] = trim($entry[0]);
 				$entry[0] = explode(' ', $entry[0]);
 				$entry[0][0] = explode('-', $entry[0][0]);
 				$result['duplex'] = strtolower($entry[0][0][0]);
 				$entry[1] = trim($entry[1]);
-				if (strpos($entry[1], 'Auto') !== false) {
+				if (mb_strpos($entry[1], 'Auto') !== false) {
 					$result['speed'] = 'auto';
 				} else {
 					$result['speed'] = (int)$entry[1];
 				} // if .. else
 				$entry[2] = rtrim($entry[2]);
-				$result['type'] = substr($entry[2], strrpos($entry[2], ' ') + 1);
-			} elseif (strpos($entry, 'input rate') !== false) {
+				$result['type'] = mb_substr($entry[2], mb_strrpos($entry[2], ' ') + 1);
+			} elseif (mb_strpos($entry, 'input rate') !== false) {
 				$entry = explode(',', $entry);
-				$result['in_rate'] = substr($entry[0], strpos($entry[0], 'rate') + 5, strrpos($entry[0], ' ') - (strpos($entry[0], 'rate') + 5));
+				$result['in_rate'] = mb_substr($entry[0], mb_strpos($entry[0], 'rate') + 5, mb_strrpos($entry[0], ' ') - (mb_strpos($entry[0], 'rate') + 5));
 				$entry = trim($entry[1]);
 				$entry = explode(' ', $entry);
 				$result['in_packet_rate'] = $entry[0];
-			} elseif (strpos($entry, 'output rate') !== false) {
+			} elseif (mb_strpos($entry, 'output rate') !== false) {
 				$entry = explode(',', $entry);
-				$result['out_rate'] = substr($entry[0], strpos($entry[0], 'rate') + 5, strrpos($entry[0], ' ') - (strpos($entry[0], 'rate') + 5));
+				$result['out_rate'] = mb_substr($entry[0], mb_strpos($entry[0], 'rate') + 5, mb_strrpos($entry[0], ' ') - (mb_strpos($entry[0], 'rate') + 5));
 				$entry = trim($entry[1]);
 				$entry = explode(' ', $entry);
 				$result['out_packet_rate'] = $entry[0];
-			} elseif (strpos($entry, 'packets input') !== false) {
+			} elseif (mb_strpos($entry, 'packets input') !== false) {
 				$entry = explode(',', $entry);
 				$entry[0] = trim($entry[0]);
 				$entry[0] = explode(' ', $entry[0]);
@@ -415,7 +415,7 @@ class cisco {
 					$entry[2] = explode(' ', $entry[2]);
 					$result['no_buffer'] = $entry[2][0];
 				} // if
-			} elseif (strpos($entry, 'Received') !== false) {
+			} elseif (mb_strpos($entry, 'Received') !== false) {
 				$entry = explode(',', $entry);
 				$entry[0] = trim($entry[0]);
 				$entry[0] = explode(' ', $entry[0]);
@@ -431,7 +431,7 @@ class cisco {
 					$entry[3] = explode(' ', $entry[3]);
 					$result['throttle'] = $entry[3][0];
 				} // if
-			} elseif (strpos($entry, 'CRC') !== false) {
+			} elseif (mb_strpos($entry, 'CRC') !== false) {
 				$entry = explode(',', $entry);
 				$entry[0] = trim($entry[0]);
 				$entry[0] = explode(' ', $entry[0]);
@@ -448,7 +448,7 @@ class cisco {
 				$entry[4] = trim($entry[4]);
 				$entry[4] = explode(' ', $entry[4]);
 				$result['ignored'] = $entry[4][0];
-			} elseif (strpos($entry, 'watchdog') !== false) {
+			} elseif (mb_strpos($entry, 'watchdog') !== false) {
 				$entry = explode(',', $entry);
 				$entry[0] = trim($entry[0]);
 				$entry[0] = explode(' ', $entry[0]);
@@ -461,11 +461,11 @@ class cisco {
 					$entry[2] = explode(' ', $entry[2]);
 					$result['pause_in'] = $entry[2][0];
 				} // if
-			} elseif (strpos($entry, 'dribble') !== false) {
+			} elseif (mb_strpos($entry, 'dribble') !== false) {
 				$entry = trim($entry);
 				$entry = explode(' ', $entry);
 				$result['in_dribble'] = $entry[0];
-			} elseif (strpos($entry, 'packets output') !== false) {
+			} elseif (mb_strpos($entry, 'packets output') !== false) {
 				$entry = explode(',', $entry);
 				$entry[0] = trim($entry[0]);
 				$entry[0] = explode(' ', $entry[0]);
@@ -476,7 +476,7 @@ class cisco {
 				$entry[2] = trim($entry[2]);
 				$entry[2] = explode(' ', $entry[2]);
 				$result['underrun'] = $entry[2][0];
-			} elseif (strpos($entry, 'output errors') !== false) {
+			} elseif (mb_strpos($entry, 'output errors') !== false) {
 				$entry = explode(',', $entry);
 				$entry[0] = trim($entry[0]);
 				$entry[0] = explode(' ', $entry[0]);
@@ -493,7 +493,7 @@ class cisco {
 					$entry[1] = explode(' ', $entry[1]);
 					$result['reset'] = $entry[1][0];
 				} // if .. else
-			} elseif (strpos($entry, 'babbles') !== false) {
+			} elseif (mb_strpos($entry, 'babbles') !== false) {
 				$entry = explode(',', $entry);
 				$entry[0] = trim($entry[0]);
 				$entry[0] = explode(' ', $entry[0]);
@@ -504,7 +504,7 @@ class cisco {
 				$entry[2] = trim($entry[2]);
 				$entry[2] = explode(' ', $entry[2]);
 				$result['deferred'] = $entry[2][0];
-			} elseif (strpos($entry, 'lost carrier') !== false) {
+			} elseif (mb_strpos($entry, 'lost carrier') !== false) {
 				$entry = explode(',', $entry);
 				$entry[0] = trim($entry[0]);
 				$entry[0] = explode(' ', $entry[0]);
@@ -517,7 +517,7 @@ class cisco {
 					$entry[2] = explode(' ', $entry[2]);
 					$result['pause_out'] = $entry[2][0];
 				} // if
-			} elseif (strpos($entry, 'output buffer failures') !== false) {
+			} elseif (mb_strpos($entry, 'output buffer failures') !== false) {
 				$entry = explode(',', $entry);
 				$entry[0] = trim($entry[0]);
 				$entry[0] = explode(' ', $entry[0]);
@@ -562,7 +562,7 @@ class cisco {
 		if (count($this->_data) > 0) {
 			foreach ($this->_data as $vlan) {
 				$vlan = explode(' ', $vlan);
-				$vlan = substr($vlan[0], 4);
+				$vlan = mb_substr($vlan[0], 4);
 				$result[] = intval($vlan);
 			} // foreach
 		} // if
@@ -580,14 +580,14 @@ class cisco {
 		for ($i = 0; $i < 2; $i++)
 			array_shift($this->_data);
 		array_pop($this->_data);
-		$pos = strpos($this->_data[0], 'Status');
+		$pos = mb_strpos($this->_data[0], 'Status');
 		foreach ($this->_data as $entry) {
 			$temp = trim($entry);
-			if (strlen($temp) > 1 && $temp[2] != 'r') {
+			if (mb_strlen($temp) > 1 && $temp[2] != 'r') {
 				$entry = array();
-				$entry['interface'] = substr($temp, 0, strpos($temp, ' '));
-				$entry['description'] = trim(substr($temp, strpos($temp, ' ') + 1, $pos - strlen($entry['interface']) - 1));
-				$temp = substr($temp, $pos);
+				$entry['interface'] = mb_substr($temp, 0, mb_strpos($temp, ' '));
+				$entry['description'] = trim(mb_substr($temp, mb_strpos($temp, ' ') + 1, $pos - mb_strlen($entry['interface']) - 1));
+				$temp = mb_substr($temp, $pos);
 				/** @noinspection PrintfScanfArgumentsInspection */
 				$temp = sscanf($temp, '%s %s');
 				$entry['status'] = $temp[0];
@@ -716,7 +716,7 @@ class cisco {
 		array_pop($this->_data);
 		for ($i = 0, $iMax = count($this->_data); $i < $iMax; $i++) {
 			$entry = trim($this->_data[$i]);
-			if (substr($entry, 0, 7) == 'Router ') {
+			if (mb_substr($entry, 0, 7) == 'Router ') {
 				/** @noinspection PrintfScanfArgumentsInspection */
 				$temp = sscanf($entry, '%s %s %s %s');
 				$entry = array();
@@ -740,13 +740,13 @@ class cisco {
 	public function configure($config) {
 		// USE AT OWN RISK: This function will apply configuration statements to a device.
 		// Enabled Only
-		if (strpos($this->_prompt, '#') === false)
+		if (mb_strpos($this->_prompt, '#') === false)
 			die('Error: User must be enabled to use configure()' . "\n");
 		$this->_data = explode("\n", $config);
 		$this->_ssh->write("config t\n");
 		$config_prompt = $this->_ssh->read('/.*[>|#]/', NET_SSH2_READ_REGEX);
 		$config_prompt = str_replace("\r\n", '', trim($config_prompt));
-		if (strpos($config_prompt, 'config)#') !== false) {
+		if (mb_strpos($config_prompt, 'config)#') !== false) {
 			foreach ($this->_data as $c)
 				$this->_ssh->write($c . "\n");
 			$this->_ssh->write("end\n");
@@ -763,7 +763,7 @@ class cisco {
 	 */
 	public function write_config() {
 		$this->exec('write');
-		if (strpos($this->_data, '[OK]') !== false)
+		if (mb_strpos($this->_data, '[OK]') !== false)
 			return true; else
 			return false;
 	}
@@ -780,7 +780,7 @@ class cisco_parser {
 	 */
 	public function get_space_depth($lines, $x) {
 		if (preg_match('/^(?P<spaces>\s+)*(?P<rest>\S.*)$/', $lines[$x], $matches)) {
-			$cdepth = strlen($matches['spaces']);
+			$cdepth = mb_strlen($matches['spaces']);
 		} else {
 			$cdepth = 0;
 		}
@@ -801,10 +801,10 @@ class cisco_parser {
 			$cdepth = get_space_depth($lines, $x);
 			$command = ltrim($lines[$x]);
 			$arguments = '';
-			$spacepos = strpos($command, ' ');
+			$spacepos = mb_strpos($command, ' ');
 			if ($spacepos !== false) {
-				$arguments = substr($command, $spacepos + 1);
-				$command = substr($command, 0, $spacepos);
+				$arguments = mb_substr($command, $spacepos + 1);
+				$command = mb_substr($command, 0, $spacepos);
 				//echo "Got C|$command|A|$arguments|<br>";
 			}
 			if ($cdepth == $depth) {
