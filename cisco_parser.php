@@ -8,7 +8,7 @@
 	$lines = explode("\n", $file);
 	$start_str = 'Building configuration...';
 	$x = 0;
-	while (substr($lines[$x], 0, strlen($start_str)) != $start_str)
+	while (mb_substr($lines[$x], 0, mb_strlen($start_str)) != $start_str)
 		$x++;
 	$info = array();
 	if (preg_match('/^Current configuration\s*:\s*(?P<config_bytes>$|\d+)( bytes)$/', $lines[$x + 2], $matches)) {
