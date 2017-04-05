@@ -15,5 +15,6 @@
 		$info['config_bytes'] = $matches['config_bytes'];
 	}
 	$x += 3;
-	$info['data'] = parse_cisco_children($lines, $x + 1);
+	$parser = new cisco_parser();
+	$info['data'] = $parser->parse_cisco_children($lines, $x + 1);
 	print_r($info);
