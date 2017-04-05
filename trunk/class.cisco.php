@@ -800,7 +800,7 @@ class cisco_parser {
 		$data = array();
 		$last_command = false;
 		for ($xMax = sizeof($lines); $x < $xMax; $x++) {
-			$cdepth = get_space_depth($lines, $x);
+			$cdepth = $this->get_space_depth($lines, $x);
 			$command = ltrim($lines[$x]);
 			$arguments = '';
 			$spacepos = strpos($command, ' ');
@@ -814,10 +814,10 @@ class cisco_parser {
 				if ($arguments != '')
 					$new_data['arguments'] = trim($arguments);
 				if ($x + 1 < sizeof($lines)) {
-					$next_depth = get_space_depth($lines, $x + 1);
+					$next_depth = $this->get_space_depth($lines, $x + 1);
 					if ($next_depth > $depth) {
-						$new_data['children'] = parse_cisco_children($lines, $x + 1, $next_depth);
-						while (get_space_depth($lines, $x + 1) > $depth)
+						$new_data['children'] = $this->parse_cisco_children($lines, $x + 1, $next_depth);
+						while ($this->get_space_depth($lines, $x + 1) > $depth)
 							++$x;
 					}
 				}
