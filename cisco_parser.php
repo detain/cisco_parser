@@ -17,4 +17,22 @@
 	$x += 3;
 	$parser = new cisco_parser();
 	$info['data'] = $parser->parse_cisco_children($lines, $x + 1);
-	print_r($info);
+	//print_r($info);
+	foreach ($info['data'] as $data) {
+		if ($data['command'] == 'interface') {
+			$interface = $data['arguments'];
+			$description = '';
+			$ipv6 = [];
+			if (isset($data['children'])) {
+				foreach ($data['children'] as $child) {
+					if ($child['command'] == 'description')
+						$description = $child['arguments'];
+					if ($child['command'] == 'ipv6' && preg_match('/^address (.*)$/', $child['arguments'], $matches))
+						$ipv6[] = $matches[1];
+				}
+				if (sizeof($ipv6) > 0) {
+					echo $interface." ".$description." ".implode(', ', $ipv6)."\n";
+				}
+			}
+		}
+	}
