@@ -192,15 +192,15 @@ class cisco {
 		$this->_prompt .= $this->_response;
 		}
 		$this->_prompt = trim($this->_prompt);*/
-		echo 'MOTD:' . $this->_motd . '<br>';
-		echo 'Prompt:' . $this->_prompt . '<br>';
+		echo 'MOTD:'.$this->_motd . '<br>';
+		echo 'Prompt:'.$this->_prompt . '<br>';
 		$length = mb_strlen($this->_prompt);
 		if (mb_substr($this->_motd, -$length) == $this->_prompt) {
 			//echo "Found Prompt<br>";
 			$this->_motd = mb_substr($this->_motd, 0, -$length);
 		}
 		//echo "MOTD:".$this->_motd . "<br>";
-		echo 'Prompt:' . $this->_prompt . '<br>';
+		echo 'Prompt:'.$this->_prompt . '<br>';
 		/*			$this->_stream = ssh2_exec($this->_ssh, "#");
 		stream_set_blocking($this->_stream, true);
 		$this->_response = stream_get_contents($this->_stream);
@@ -265,8 +265,8 @@ class cisco {
 	public function show_int_config($int) {
 		// Enabled Only
 		//if (mb_strpos($this->_prompt, '#') === false)
-		//	die('Error: User must be enabled to use show_int_config()' . "\n");
-		$this->exec('show run int ' . $int);
+		//	die('Error: User must be enabled to use show_int_config()'."\n");
+		$this->exec('show run int '.$int);
 		return $this->show_int_config_parser();
 	}
 
@@ -307,7 +307,7 @@ class cisco {
 				$entry['vlan'] = $temp[1];
 				$entry['duplex'] = $temp[2];
 				$entry['speed'] = $temp[3];
-				$entry['type'] = trim($temp[4] . ' ' . $temp[5]);
+				$entry['type'] = trim($temp[4] . ' '.$temp[5]);
 				$result[] = $entry;
 			} // if
 		} // foreach
@@ -321,7 +321,7 @@ class cisco {
 	public function show_log() {
 		// Enabled Only
 		if (mb_strpos($this->_prompt, '#') === false)
-			die('Error: User must be enabled to use show_log()' . "\n");
+			die('Error: User must be enabled to use show_log()'."\n");
 		$result = array();
 		$this->exec('sh log | inc %');
 		$this->_data = explode("\r\n", $this->_data);
@@ -349,7 +349,7 @@ class cisco {
 	 */
 	public function show_int($int) {
 		$result = array();
-		$this->exec('show int ' . $int);
+		$this->exec('show int '.$int);
 		$this->_data = explode("\r\n", $this->_data);
 		foreach ($this->_data as $entry) {
 			$entry = trim($entry);
@@ -741,7 +741,7 @@ class cisco {
 		// USE AT OWN RISK: This function will apply configuration statements to a device.
 		// Enabled Only
 		if (mb_strpos($this->_prompt, '#') === false)
-			die('Error: User must be enabled to use configure()' . "\n");
+			die('Error: User must be enabled to use configure()'."\n");
 		$this->_data = explode("\n", $config);
 		$this->_ssh->write("config t\n");
 		$config_prompt = $this->_ssh->read('/.*[>|#]/', NET_SSH2_READ_REGEX);
@@ -755,7 +755,7 @@ class cisco {
 		$result = explode("\r\n", $result);
 		if (count($this->_data) == (count($result) - 2))
 			return true; else
-			die('Error: Switch rejected configuration: ' . "\n" . $config . "\n");
+			die('Error: Switch rejected configuration: '."\n" . $config . "\n");
 	}
 
 	/**
