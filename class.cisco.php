@@ -119,7 +119,7 @@ class cisco {
 		while (!feof($this->_stream)) {
 			if ($regex) {
 				preg_match($pattern, $this->_response, $matches);
-				//echo 'M:'.print_r($matches, true) . '<br>';
+				//echo 'M:'.print_r($matches, true).'<br>';
 				$match = isset($matches[0]) ? $matches[0] : array();
 			}
 			$pos = !empty($match) ? mb_strpos($this->_response, $match) : false;
@@ -192,15 +192,15 @@ class cisco {
 		$this->_prompt .= $this->_response;
 		}
 		$this->_prompt = trim($this->_prompt);*/
-		echo 'MOTD:'.$this->_motd . '<br>';
-		echo 'Prompt:'.$this->_prompt . '<br>';
+		echo 'MOTD:'.$this->_motd.'<br>';
+		echo 'Prompt:'.$this->_prompt.'<br>';
 		$length = mb_strlen($this->_prompt);
 		if (mb_substr($this->_motd, -$length) == $this->_prompt) {
 			//echo "Found Prompt<br>";
 			$this->_motd = mb_substr($this->_motd, 0, -$length);
 		}
 		//echo "MOTD:".$this->_motd . "<br>";
-		echo 'Prompt:'.$this->_prompt . '<br>';
+		echo 'Prompt:'.$this->_prompt.'<br>';
 		/*			$this->_stream = ssh2_exec($this->_ssh, "#");
 		stream_set_blocking($this->_stream, true);
 		$this->_response = stream_get_contents($this->_stream);
@@ -307,7 +307,7 @@ class cisco {
 				$entry['vlan'] = $temp[1];
 				$entry['duplex'] = $temp[2];
 				$entry['speed'] = $temp[3];
-				$entry['type'] = trim($temp[4] . ' '.$temp[5]);
+				$entry['type'] = trim($temp[4].' '.$temp[5]);
 				$result[] = $entry;
 			} // if
 		} // foreach
