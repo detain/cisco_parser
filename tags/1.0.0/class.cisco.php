@@ -265,7 +265,7 @@ class cisco {
 	public function show_int_config($int) {
 		// Enabled Only
 		//if (mb_strpos($this->_prompt, '#') === false)
-		//	die('Error: User must be enabled to use show_int_config()'."\n");
+		//	die('Error: User must be enabled to use show_int_config()'.PHP_EOL);
 		$this->exec('show run int '.$int);
 		return $this->show_int_config_parser();
 	}
@@ -321,7 +321,7 @@ class cisco {
 	public function show_log() {
 		// Enabled Only
 		if (mb_strpos($this->_prompt, '#') === false)
-			die('Error: User must be enabled to use show_log()'."\n");
+			die('Error: User must be enabled to use show_log()'.PHP_EOL);
 		$result = array();
 		$this->exec('sh log | inc %');
 		$this->_data = explode("\r\n", $this->_data);
@@ -741,7 +741,7 @@ class cisco {
 		// USE AT OWN RISK: This function will apply configuration statements to a device.
 		// Enabled Only
 		if (mb_strpos($this->_prompt, '#') === false)
-			die('Error: User must be enabled to use configure()'."\n");
+			die('Error: User must be enabled to use configure()'.PHP_EOL);
 		$this->_data = explode("\n", $config);
 		$this->_ssh->write("config t\n");
 		$config_prompt = $this->_ssh->read('/.*[>|#]/', NET_SSH2_READ_REGEX);
@@ -755,7 +755,7 @@ class cisco {
 		$result = explode("\r\n", $result);
 		if (count($this->_data) == (count($result) - 2))
 			return true; else
-			die('Error: Switch rejected configuration: '."\n" . $config . "\n");
+			die('Error: Switch rejected configuration: '.PHP_EOL . $config . "\n");
 	}
 
 	/**
