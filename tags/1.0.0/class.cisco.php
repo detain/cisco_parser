@@ -119,11 +119,11 @@ class cisco {
 		while (!feof($this->_stream)) {
 			if ($regex) {
 				preg_match($pattern, $this->_response, $matches);
-				//echo 'M:'.print_r($matches, true).'<br>';
+				//echo 'M:'.print_r($matches, TRUE).'<br>';
 				$match = isset($matches[0]) ? $matches[0] : array();
 			}
 			$pos = !empty($match) ? mb_strpos($this->_response, $match) : false;
-			//echo ++$i . "POS:".var_export($pos, true).'<br>';
+			//echo ++$i . "POS:".var_export($pos, TRUE).'<br>';
 			if ($pos !== FALSE) {
 				//echo "$match Matching $pattern @ $pos <br>";
 				return $this->_string_shift($this->_response, $pos + mb_strlen($match));
@@ -168,9 +168,9 @@ class cisco {
 	 *
 	 */
 	public function parse_motd_and_prompt() {
-		$this->_motd = trim($this->read('/.*[>|#]/', true));
+		$this->_motd = trim($this->read('/.*[>|#]/', TRUE));
 		$this->write("\n");
-		$this->_prompt = trim($this->read('/.*[>|#]/', true));
+		$this->_prompt = trim($this->read('/.*[>|#]/', TRUE));
 		$length = mb_strlen($this->_prompt);
 		if (mb_substr($this->_motd, -$length) == $this->_prompt)
 			$this->_motd = mb_substr($this->_motd, 0, -$length);
@@ -185,7 +185,7 @@ class cisco {
 		$this->_motd = trim($this->_motd);
 		fwrite($this->_stream, "\n");
 		$this->_response = stream_get_contents($this->_stream);
-		//stream_set_blocking($this->_stream, false);
+		//stream_set_blocking($this->_stream, FALSE);
 		$this->_prompt = trim($this->_response);
 		/*			sleep (1);
 		while ($this->_response = fgets($this->_stream)) {
@@ -202,10 +202,10 @@ class cisco {
 		//echo "MOTD:".$this->_motd . "<br>";
 		echo 'Prompt:'.$this->_prompt.'<br>';
 		/*			$this->_stream = ssh2_exec($this->_ssh, "#");
-		stream_set_blocking($this->_stream, true);
+		stream_set_blocking($this->_stream, TRUE);
 		$this->_response = stream_get_contents($this->_stream);
 		$this->_data = $this->_response;
-		stream_set_blocking($this->_stream, false);
+		stream_set_blocking($this->_stream, FALSE);
 		var_dump($this->_response);
 		*/
 	}
@@ -230,7 +230,7 @@ class cisco {
 			$this->_response = mb_substr($this->_response, 0, -$length);
 		}
 		$this->_data = $this->_response;
-		//stream_set_blocking($this->_stream, false);
+		//stream_set_blocking($this->_stream, FALSE);
 		//if (mb_strpos($this->_data, '% Invalid input detected') !== FALSE) $this->_data = FALSE;
 		return $this->_data;
 	}
