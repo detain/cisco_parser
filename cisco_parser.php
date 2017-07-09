@@ -31,7 +31,7 @@
 						$ipv6[] = $matches[1];
 				}
 				if (sizeof($ipv6) > 0) {
-					echo $interface." ".$description." ".implode(', ', $ipv6)."\n";
+					echo $interface." ".$description." ".implode(', ', $ipv6).PHP_EOL;
 				}
 			}
 		}
