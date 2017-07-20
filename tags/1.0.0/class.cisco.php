@@ -120,7 +120,7 @@ class cisco {
 			if ($regex) {
 				preg_match($pattern, $this->_response, $matches);
 				//echo 'M:'.print_r($matches, TRUE).'<br>';
-				$match = isset($matches[0]) ? $matches[0] : array();
+				$match = isset($matches[0]) ? $matches[0] : [];
 			}
 			$pos = !empty($match) ? mb_strpos($this->_response, $match) : false;
 			//echo ++$i . "POS:".var_export($pos, TRUE).'<br>';
@@ -287,7 +287,7 @@ class cisco {
 	 * @return array
 	 */
 	public function show_int_status() {
-		$result = array();
+		$result = [];
 		$this->exec('show int status');
 		$this->_data = explode("\r\n", $this->_data);
 		for ($i = 0; $i < 2; $i++)
@@ -297,7 +297,7 @@ class cisco {
 		foreach ($this->_data as $entry) {
 			$temp = trim($entry);
 			if (mb_strlen($temp) > 1 && $temp[2] != 'r' && $temp[0] != '-') {
-				$entry = array();
+				$entry = [];
 				$entry['interface'] = mb_substr($temp, 0, mb_strpos($temp, ' '));
 				$entry['description'] = trim(mb_substr($temp, mb_strpos($temp, ' ') + 1, $pos - mb_strlen($entry['interface']) - 1));
 				$temp = mb_substr($temp, $pos);
@@ -322,14 +322,14 @@ class cisco {
 		// Enabled Only
 		if (mb_strpos($this->_prompt, '#') === FALSE)
 			die('Error: User must be enabled to use show_log()'.PHP_EOL);
-		$result = array();
+		$result = [];
 		$this->exec('sh log | inc %');
 		$this->_data = explode("\r\n", $this->_data);
 		array_shift($this->_data);
 		array_pop($this->_data);
 		foreach ($this->_data as $entry) {
 			$temp = trim($entry);
-			$entry = array();
+			$entry = [];
 			$entry['timestamp'] = mb_substr($temp, 0, mb_strpos($temp, '%') - 2);
 			if ($entry['timestamp'][0] == '.' || $entry['timestamp'][0] == '*')
 				$entry['timestamp'] = mb_substr($entry['timestamp'], 1);
@@ -348,7 +348,7 @@ class cisco {
 	 * @return array
 	 */
 	public function show_int($int) {
-		$result = array();
+		$result = [];
 		$this->exec('show int '.$int);
 		$this->_data = explode("\r\n", $this->_data);
 		foreach ($this->_data as $entry) {
@@ -535,7 +535,7 @@ class cisco {
 	 * @return array
 	 */
 	public function trunk_ports() {
-		$result = array();
+		$result = [];
 		$this->exec('show interface status | include trunk');
 		$this->_data = explode("\r\n", $this->_data);
 		array_shift($this->_data);
@@ -554,7 +554,7 @@ class cisco {
 	 * @return array
 	 */
 	public function vlans() {
-		$result = array();
+		$result = [];
 		$this->exec('show spanning-tree summary | include ^VLAN');
 		$this->_data = explode("\r\n", $this->_data);
 		array_shift($this->_data);
@@ -574,7 +574,7 @@ class cisco {
 	 * @return array
 	 */
 	public function errdisabled() {
-		$result = array();
+		$result = [];
 		$this->exec('show int status err');
 		$this->_data = explode("\r\n", $this->_data);
 		for ($i = 0; $i < 2; $i++)
@@ -584,7 +584,7 @@ class cisco {
 		foreach ($this->_data as $entry) {
 			$temp = trim($entry);
 			if (mb_strlen($temp) > 1 && $temp[2] != 'r') {
-				$entry = array();
+				$entry = [];
 				$entry['interface'] = mb_substr($temp, 0, mb_strpos($temp, ' '));
 				$entry['description'] = trim(mb_substr($temp, mb_strpos($temp, ' ') + 1, $pos - mb_strlen($entry['interface']) - 1));
 				$temp = mb_substr($temp, $pos);
@@ -603,7 +603,7 @@ class cisco {
 	 * @return array
 	 */
 	public function dhcpsnoop_bindings() {
-		$result = array();
+		$result = [];
 		$this->exec('sh ip dhcp snoop binding | inc dhcp-snooping');
 		$this->_data = explode("\r\n", $this->_data);
 		array_shift($this->_data);
@@ -611,7 +611,7 @@ class cisco {
 		foreach ($this->_data as $entry) {
 			/** @noinspection PrintfScanfArgumentsInspection */
 			$temp = sscanf($entry, '%s %s %s %s %s %s');
-			$entry = array();
+			$entry = [];
 			$entry['mac_address'] = $temp[0];
 			$entry['mac_address'] = strtolower(str_replace(':', '', $entry['mac_address']));
 			$entry['ip_address'] = $temp[1];
@@ -629,7 +629,7 @@ class cisco {
 	 * @return array
 	 */
 	public function mac_address_table() {
-		$result = array();
+		$result = [];
 		$omit = $this->trunk_ports();
 		$this->exec('show mac address-table | exclude CPU');
 		$this->_data = str_replace('          ', '', $this->_data);
@@ -641,7 +641,7 @@ class cisco {
 		foreach ($this->_data as $entry) {
 			/** @noinspection PrintfScanfArgumentsInspection */
 			$temp = sscanf($entry, '%s %s %s %s');
-			$entry = array();
+			$entry = [];
 			$entry['mac_address'] = $temp[1];
 			$entry['interface'] = $temp[3];
 			if (in_array($entry['interface'], $omit) == FALSE) {
@@ -656,7 +656,7 @@ class cisco {
 	 * @return array
 	 */
 	public function arp_table() {
-		$result = array();
+		$result = [];
 		$this->exec('show arp | exc Incomplete');
 		$this->_data = explode("\r\n", $this->_data);
 		for ($i = 0; $i < 2; $i++)
@@ -665,7 +665,7 @@ class cisco {
 		foreach ($this->_data as $entry) {
 			/** @noinspection PrintfScanfArgumentsInspection */
 			$temp = sscanf($entry, '%s %s %s %s %s %s');
-			$entry = array();
+			$entry = [];
 			$entry['ip'] = $temp[1];
 			$entry['mac_address'] = $temp[3];
 			if ($temp[2] == '-')
@@ -684,7 +684,7 @@ class cisco {
 	 * @return array
 	 */
 	public function ipv6_neighbor_table() {
-		$result = array();
+		$result = [];
 		$this->exec('show ipv6 neighbors | exc INCMP');
 		$this->_data = explode("\r\n", $this->_data);
 		for ($i = 0; $i < 2; $i++)
@@ -694,7 +694,7 @@ class cisco {
 		foreach ($this->_data as $entry) {
 			/** @noinspection PrintfScanfArgumentsInspection */
 			$temp = sscanf($entry, '%s %s %s %s %s');
-			$entry = array();
+			$entry = [];
 			$entry['ipv6'] = $temp[0];
 			$entry['mac_address'] = $temp[2];
 			$entry['age'] = $temp[1];
@@ -709,7 +709,7 @@ class cisco {
 	 * @return array
 	 */
 	public function ipv6_routers() {
-		$result = array();
+		$result = [];
 		$this->exec('show ipv6 routers');
 		$this->_data = explode("\r\n", $this->_data);
 		array_shift($this->_data);
@@ -719,7 +719,7 @@ class cisco {
 			if (mb_substr($entry, 0, 7) == 'Router ') {
 				/** @noinspection PrintfScanfArgumentsInspection */
 				$temp = sscanf($entry, '%s %s %s %s');
-				$entry = array();
+				$entry = [];
 				$entry['router'] = $temp[1];
 				$entry['interface'] = str_replace(',', '', $temp[3]);
 				/** @noinspection PrintfScanfArgumentsInspection */
@@ -795,7 +795,7 @@ class cisco_parser {
 	 */
 	public function parse_cisco_children($lines, $x = 0, $depth = 0) {
 		//global $x;
-		$data = array();
+		$data = [];
 		$last_command = FALSE;
 		for ($xMax = count($lines); $x < $xMax; $x++) {
 			$cdepth = get_space_depth($lines, $x);
@@ -808,7 +808,7 @@ class cisco_parser {
 				//echo "Got C|$command|A|$arguments|<br>";
 			}
 			if ($cdepth == $depth) {
-				$new_data = array('command' => $command);
+				$new_data = ['command' => $command];
 				if ($arguments != '')
 					$new_data['arguments'] = trim($arguments);
 				if ($x + 1 < count($lines)) {
