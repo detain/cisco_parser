@@ -563,7 +563,7 @@ class cisco {
 			foreach ($this->_data as $vlan) {
 				$vlan = explode(' ', $vlan);
 				$vlan = mb_substr($vlan[0], 4);
-				$result[] = intval($vlan);
+				$result[] = (int)$vlan;
 			} // foreach
 		} // if
 		$this->_data = $result;
@@ -797,7 +797,7 @@ class cisco_parser {
 		//global $x;
 		$data = array();
 		$last_command = FALSE;
-		for ($xMax = sizeof($lines); $x < $xMax; $x++) {
+		for ($xMax = count($lines); $x < $xMax; $x++) {
 			$cdepth = get_space_depth($lines, $x);
 			$command = ltrim($lines[$x]);
 			$arguments = '';
@@ -811,7 +811,7 @@ class cisco_parser {
 				$new_data = array('command' => $command);
 				if ($arguments != '')
 					$new_data['arguments'] = trim($arguments);
-				if ($x + 1 < sizeof($lines)) {
+				if ($x + 1 < count($lines)) {
 					$next_depth = get_space_depth($lines, $x + 1);
 					if ($next_depth > $depth) {
 						$new_data['children'] = parse_cisco_children($lines, $x + 1, $next_depth);
