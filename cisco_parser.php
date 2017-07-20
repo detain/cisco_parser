@@ -10,7 +10,7 @@
 	$x = 0;
 	while (mb_substr($lines[$x], 0, mb_strlen($start_str)) != $start_str)
 		$x++;
-	$info = array();
+	$info = [];
 	if (preg_match('/^Current configuration\s*:\s*(?P<config_bytes>$|\d+)( bytes)$/', $lines[$x + 2], $matches)) {
 		$info['config_bytes'] = $matches['config_bytes'];
 	}
