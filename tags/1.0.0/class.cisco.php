@@ -725,7 +725,7 @@ class cisco {
 				/** @noinspection PrintfScanfArgumentsInspection */
 				$temp = sscanf(trim($this->_data[$i + 4]), '%s %s %s');
 				$entry['prefix'] = $temp[1];
-				$i = $i + 5;
+				$i += 5;
 				$result[] = $entry;
 			} // if
 		} // for
