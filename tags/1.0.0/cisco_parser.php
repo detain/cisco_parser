@@ -1,6 +1,6 @@
 <?php
 	/* This was probably written before i wrote the class, so need to update a few links to use the class instead */
-	include('class.cisco.php');
+	include 'class.cisco.php';
 	if (!isset($_SERVER['argv'][1]) || !file_exists($_SERVER['argv'][1])) {
 		die('Specify a (valid) file as the first argument to get it parsed');
 	}
