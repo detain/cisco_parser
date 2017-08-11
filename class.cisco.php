@@ -7,9 +7,8 @@
  *    http://technologyordie.com/parsing-cisco-show-command-output
  *    http://packetpushers.net/rocking-your-show-commands-with-regex/
  * Based on code from http://www.soucy.org/project/cisco/
- * Last Changed: $LastChangedDate: 2017-07-20 01:39:25 -0400 (Thu, 20 Jul 2017) $
  *
- * @author detain
+ * @author Joe Huss <detain@interserver.net>
  * @version $Revision: 58 $
  * @copyright 2017
  * @package MyAdmin
