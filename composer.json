@@ -23,6 +23,9 @@
         "ext-ssh2": "*",
         "roave/security-advisories": "dev-master"
     },
+    "require-dev": {
+        "phpunit/phpunit": ">=4.8.35, <6.0.0"
+    },
     "autoload": {
         "classmap": [
             "cisco_parser.php"
