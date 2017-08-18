@@ -4,6 +4,10 @@ env:
 language: php
 os: linux
 dist: trusty
+addons:
+    apt:
+        packages:
+        - libssh2-php
 sudo: false
 php:
   - 5.4
