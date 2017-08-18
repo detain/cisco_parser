@@ -7,6 +7,9 @@ use PHPUnit\Framework\TestCase;
  */
 class ciscoTest extends TestCase
 {
+	protected $hostname;
+	protected $username;
+	protected $password;
     /**
      * @var cisco
      */
@@ -19,7 +22,7 @@ class ciscoTest extends TestCase
     protected function setUp()
     {
 	require_once __DIR__.'/../class.cisco.php';
-        $this->object = new cisco;
+        $this->object = new cisco($this->hostname, $this->username, $this->password);
     }
 
     /**
