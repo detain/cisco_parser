@@ -153,9 +153,8 @@ class cisco {
 	public function connect() {
 		//echo "Connecting to " . $this->_hostname . "<br>";
 		$this->_ssh = ssh2_connect($this->_hostname, $this->_port);
-		if ($this->_ssh === FALSE) {
+		if ($this->_ssh === FALSE)
 			return false;
-		}
 		ssh2_auth_password($this->_ssh, $this->_username, $this->_password);
 		$this->_stream = ssh2_shell($this->_ssh);
 		$this->connected = true;
@@ -178,18 +177,16 @@ class cisco {
 		return true;
 		sleep(1);
 		$this->_motd = '';
-		while ($this->_response = fgets($this->_stream)) {
+		while ($this->_response = fgets($this->_stream))
 			$this->_motd .= $this->_response;
-		}
 		$this->_motd = trim($this->_motd);
 		fwrite($this->_stream, "\n");
 		$this->_response = stream_get_contents($this->_stream);
 		//stream_set_blocking($this->_stream, FALSE);
 		$this->_prompt = trim($this->_response);
 		/*			sleep (1);
-		while ($this->_response = fgets($this->_stream)) {
-		$this->_prompt .= $this->_response;
-		}
+		while ($this->_response = fgets($this->_stream))
+			$this->_prompt .= $this->_response;
 		$this->_prompt = trim($this->_prompt);*/
 		echo 'MOTD:'.$this->_motd.'<br>';
 		echo 'Prompt:'.$this->_prompt.'<br>';
