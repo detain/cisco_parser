@@ -24,5 +24,5 @@ composer require detain/cisco_parser
 
 ## License
 
-The Cisco Communications and Configuration parsing Class class is licensed under the LGPL-v2 license.
+The Cisco Communications and Configuration parsing Class class is licensed under the LGPL-v2.1 license.
 
