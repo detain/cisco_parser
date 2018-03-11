@@ -24,7 +24,7 @@ class cisco {
 	/**
 	 * @var bool
 	 */
-	public $autoconnect = true; // Sets whether or not exec() will automatically connect() if needed
+	public $autoconnect = TRUE; // Sets whether or not exec() will automatically connect() if needed
 	/**
 	 * @var int
 	 */
@@ -121,7 +121,7 @@ class cisco {
 				//echo 'M:'.print_r($matches, TRUE).'<br>';
 				$match = isset($matches[0]) ? $matches[0] : [];
 			}
-			$pos = !empty($match) ? mb_strpos($this->_response, $match) : false;
+			$pos = !empty($match) ? mb_strpos($this->_response, $match) : FALSE;
 			//echo ++$i . "POS:".var_export($pos, TRUE).'<br>';
 			if ($pos !== FALSE) {
 				//echo "$match Matching $pattern @ $pos <br>";
@@ -154,12 +154,12 @@ class cisco {
 		//echo "Connecting to " . $this->_hostname . "<br>";
 		$this->_ssh = ssh2_connect($this->_hostname, $this->_port);
 		if ($this->_ssh === FALSE)
-			return false;
+			return FALSE;
 		ssh2_auth_password($this->_ssh, $this->_username, $this->_password);
 		$this->_stream = ssh2_shell($this->_ssh);
-		$this->connected = true;
+		$this->connected = TRUE;
 		$this->parse_motd_and_prompt();
-		return true;
+		return TRUE;
 	}
 
 	/**
@@ -174,7 +174,7 @@ class cisco {
 			$this->_motd = mb_substr($this->_motd, 0, -$length);
 		//echo "MOTD:".$this->_motd."<br>";
 		//echo "Prompt:".$this->_prompt.'<br>';
-		return true;
+		return TRUE;
 		sleep(1);
 		$this->_motd = '';
 		while ($this->_response = fgets($this->_stream))
@@ -211,7 +211,7 @@ class cisco {
 	 * @return string
 	 */
 	public function exec($cmd) {
-		if ($this->autoconnect === true && $this->connected === FALSE)
+		if ($this->autoconnect === TRUE && $this->connected === FALSE)
 			$this->connect();
 		if (mb_substr($cmd, -1) != "\n") {
 			//error_log("Adding NEWLINE Character To SSH2 Command $cmd", __LINE__, __FILE__);
@@ -250,7 +250,7 @@ class cisco {
 	 *
 	 */
 	public function __destruct() {
-		if ($this->connected === true)
+		if ($this->connected === TRUE)
 			$this->disconnect();
 	}
 
@@ -382,7 +382,7 @@ class cisco {
 				if (mb_strpos($entry[1], 'Auto') !== FALSE) {
 					$result['speed'] = 'auto';
 				} else {
-					$result['speed'] = (int)$entry[1];
+					$result['speed'] = (int) $entry[1];
 				} // if .. else
 				$entry[2] = rtrim($entry[2]);
 				$result['type'] = mb_substr($entry[2], mb_strrpos($entry[2], ' ') + 1);
@@ -559,7 +559,7 @@ class cisco {
 			foreach ($this->_data as $vlan) {
 				$vlan = explode(' ', $vlan);
 				$vlan = mb_substr($vlan[0], 4);
-				$result[] = (int)$vlan;
+				$result[] = (int) $vlan;
 			} // foreach
 		} // if
 		$this->_data = $result;
@@ -744,7 +744,7 @@ class cisco {
 		$config_prompt = str_replace("\r\n", '', trim($config_prompt));
 		if (mb_strpos($config_prompt, 'config)#') !== FALSE) {
 			foreach ($this->_data as $c)
-				$this->_ssh->write($c . "\n");
+				$this->_ssh->write($c."\n");
 			$this->_ssh->write("end\n");
 		}
 		$result = $this->_ssh->read($this->_prompt);
@@ -752,7 +752,7 @@ class cisco {
 		if (count($this->_data) == (count($result) - 2))
 			return TRUE;
 		else
-			die('Error: Switch rejected configuration: '.PHP_EOL . $config . "\n");
+			die('Error: Switch rejected configuration: '.PHP_EOL.$config."\n");
 	}
 
 	/**
