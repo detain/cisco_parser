@@ -90,7 +90,7 @@ class cisco {
 	}
 
 	/**
-	 * @param     $string
+	 * @param     string $string
 	 * @param int $index
 	 * @return string
 	 */
@@ -141,7 +141,7 @@ class cisco {
 	}
 
 	/**
-	 * @param $cmd
+	 * @param string $cmd
 	 */
 	public function write($cmd) {
 		fwrite($this->_stream, $cmd);
@@ -207,7 +207,7 @@ class cisco {
 	}
 
 	/**
-	 * @param $cmd
+	 * @param string $cmd
 	 * @return string
 	 */
 	public function exec($cmd) {
@@ -232,7 +232,7 @@ class cisco {
 	}
 
 	/**
-	 * @return mixed
+	 * @return string
 	 */
 	public function get_response() {
 		return $this->_response;
@@ -731,7 +731,7 @@ class cisco {
 
 	/**
 	 * @param $config
-	 * @return bool
+	 * @return null|boolean
 	 */
 	public function configure($config) {
 		// USE AT OWN RISK: This function will apply configuration statements to a device.
@@ -773,7 +773,7 @@ class cisco {
 class cisco_parser {
 	/**
 	 * @param $lines
-	 * @param $x
+	 * @param integer $x
 	 * @return int
 	 */
 	public function get_space_depth($lines, $x) {
