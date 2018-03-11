@@ -750,7 +750,8 @@ class cisco {
 		$result = $this->_ssh->read($this->_prompt);
 		$result = explode("\r\n", $result);
 		if (count($this->_data) == (count($result) - 2))
-			return true; else
+			return TRUE;
+		else
 			die('Error: Switch rejected configuration: '.PHP_EOL . $config . "\n");
 	}
 
@@ -760,8 +761,9 @@ class cisco {
 	public function write_config() {
 		$this->exec('write');
 		if (mb_strpos($this->_data, '[OK]') !== FALSE)
-			return true; else
-			return false;
+			return TRUE; 
+		else
+			return FALSE;
 	}
 }
 
