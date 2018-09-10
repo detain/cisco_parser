@@ -20,11 +20,12 @@
  *
  * @access public
  */
-class cisco {
+class cisco
+{
 	/**
 	 * @var bool
 	 */
-	public $autoconnect = TRUE; // Sets whether or not exec() will automatically connect() if needed
+	public $autoconnect = true; // Sets whether or not exec() will automatically connect() if needed
 	/**
 	 * @var int
 	 */
@@ -32,7 +33,7 @@ class cisco {
 	/**
 	 * @var bool
 	 */
-	public $connected = FALSE; // True/False Whether or not you are currently connected
+	public $connected = false; // True/False Whether or not you are currently connected
 	/**
 	 * @var
 	 */
@@ -80,13 +81,15 @@ class cisco {
 	 * @param     $password
 	 * @param int $port
 	 */
-	public function __construct($hostname, $username, $password, $port = 22) {
+	public function __construct($hostname, $username, $password, $port = 22)
+	{
 		$this->_hostname = $hostname;
 		$this->_username = $username;
 		$this->_password = $password;
 		$this->_port = $port;
-		if ($this->min_timeout && ini_get('default_socket_timeout') < $this->min_timeout)
+		if ($this->min_timeout && ini_get('default_socket_timeout') < $this->min_timeout) {
 			ini_set('default_socket_timeout', $this->min_timeout);
+		}
 	}
 
 	/**
@@ -94,7 +97,8 @@ class cisco {
 	 * @param int $index
 	 * @return string
 	 */
-	public function _string_shift(&$string, $index = 1) {
+	public function _string_shift(&$string, $index = 1)
+	{
 		$substr = mb_substr($string, 0, $index);
 		$string = mb_substr($string, $index);
 		return $substr;
@@ -110,7 +114,8 @@ class cisco {
 	 * @return String
 	 * @access public
 	 */
-	public function read($pattern = '', $regex = FALSE) {
+	public function read($pattern = '', $regex = false)
+	{
 		//usleep(1000);
 		$this->_response = '';
 		$match = $pattern;
@@ -121,9 +126,9 @@ class cisco {
 				//echo 'M:'.print_r($matches, TRUE).'<br>';
 				$match = isset($matches[0]) ? $matches[0] : [];
 			}
-			$pos = !empty($match) ? mb_strpos($this->_response, $match) : FALSE;
+			$pos = !empty($match) ? mb_strpos($this->_response, $match) : false;
 			//echo ++$i . "POS:".var_export($pos, TRUE).'<br>';
-			if ($pos !== FALSE) {
+			if ($pos !== false) {
 				//echo "$match Matching $pattern @ $pos <br>";
 				return $this->_string_shift($this->_response, $pos + mb_strlen($match));
 			}
@@ -143,42 +148,48 @@ class cisco {
 	/**
 	 * @param string $cmd
 	 */
-	public function write($cmd) {
+	public function write($cmd)
+	{
 		fwrite($this->_stream, $cmd);
 	}
 
 	/**
 	 * @return bool
 	 */
-	public function connect() {
+	public function connect()
+	{
 		//echo "Connecting to " . $this->_hostname . "<br>";
 		$this->_ssh = ssh2_connect($this->_hostname, $this->_port);
-		if ($this->_ssh === FALSE)
-			return FALSE;
+		if ($this->_ssh === false) {
+			return false;
+		}
 		ssh2_auth_password($this->_ssh, $this->_username, $this->_password);
 		$this->_stream = ssh2_shell($this->_ssh);
-		$this->connected = TRUE;
+		$this->connected = true;
 		$this->parse_motd_and_prompt();
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 *
 	 */
-	public function parse_motd_and_prompt() {
-		$this->_motd = trim($this->read('/.*[>|#]/', TRUE));
+	public function parse_motd_and_prompt()
+	{
+		$this->_motd = trim($this->read('/.*[>|#]/', true));
 		$this->write("\n");
-		$this->_prompt = trim($this->read('/.*[>|#]/', TRUE));
+		$this->_prompt = trim($this->read('/.*[>|#]/', true));
 		$length = mb_strlen($this->_prompt);
-		if (mb_substr($this->_motd, -$length) == $this->_prompt)
+		if (mb_substr($this->_motd, -$length) == $this->_prompt) {
 			$this->_motd = mb_substr($this->_motd, 0, -$length);
+		}
 		//echo "MOTD:".$this->_motd."<br>";
 		//echo "Prompt:".$this->_prompt.'<br>';
-		return TRUE;
+		return true;
 		sleep(1);
 		$this->_motd = '';
-		while ($this->_response = fgets($this->_stream))
+		while ($this->_response = fgets($this->_stream)) {
 			$this->_motd .= $this->_response;
+		}
 		$this->_motd = trim($this->_motd);
 		fwrite($this->_stream, "\n");
 		$this->_response = stream_get_contents($this->_stream);
@@ -210,14 +221,16 @@ class cisco {
 	 * @param string $cmd
 	 * @return string
 	 */
-	public function exec($cmd) {
-		if ($this->autoconnect === TRUE && $this->connected === FALSE)
+	public function exec($cmd)
+	{
+		if ($this->autoconnect === true && $this->connected === false) {
 			$this->connect();
+		}
 		if (mb_substr($cmd, -1) != "\n") {
 			//error_log("Adding NEWLINE Character To SSH2 Command $cmd", __LINE__, __FILE__);
 			$cmd .= "\n";
 		}
-		$this->_data = FALSE;
+		$this->_data = false;
 		fwrite($this->_stream, $cmd);
 		$this->_response = trim($this->read($this->_prompt));
 		$length = mb_strlen($this->_prompt);
@@ -234,31 +247,36 @@ class cisco {
 	/**
 	 * @return string
 	 */
-	public function get_response() {
+	public function get_response()
+	{
 		return $this->_response;
 	}
 
 	/**
 	 *
 	 */
-	public function disconnect() {
+	public function disconnect()
+	{
 		//ssh2_exec($this->_ssh, 'quit');
-		$this->connected = FALSE;
+		$this->connected = false;
 	}
 
 	/**
 	 *
 	 */
-	public function __destruct() {
-		if ($this->connected === TRUE)
+	public function __destruct()
+	{
+		if ($this->connected === true) {
 			$this->disconnect();
+		}
 	}
 
 	/**
 	 * @param $int
 	 * @return string
 	 */
-	public function show_int_config($int) {
+	public function show_int_config($int)
+	{
 		// Enabled Only
 		//if (mb_strpos($this->_prompt, '#') === FALSE)
 		//	die('Error: User must be enabled to use show_int_config()'.PHP_EOL);
@@ -269,12 +287,15 @@ class cisco {
 	/**
 	 * @return string
 	 */
-	public function show_int_config_parser() {
+	public function show_int_config_parser()
+	{
 		$this->_data = explode("\r\n", $this->_data);
-		for ($i = 0; $i < 5; $i++)
+		for ($i = 0; $i < 5; $i++) {
 			array_shift($this->_data);
-		for ($i = 0; $i < 2; $i++)
+		}
+		for ($i = 0; $i < 2; $i++) {
 			array_pop($this->_data);
+		}
 		$this->_data = implode("\n", $this->_data);
 		return $this->_data;
 	}
@@ -282,12 +303,14 @@ class cisco {
 	/**
 	 * @return array
 	 */
-	public function show_int_status() {
+	public function show_int_status()
+	{
 		$result = [];
 		$this->exec('show int status');
 		$this->_data = explode("\r\n", $this->_data);
-		for ($i = 0; $i < 2; $i++)
+		for ($i = 0; $i < 2; $i++) {
 			array_shift($this->_data);
+		}
 		array_pop($this->_data);
 		$pos = mb_strpos($this->_data[0], 'Status');
 		foreach ($this->_data as $entry) {
@@ -314,10 +337,12 @@ class cisco {
 	/**
 	 * @return array
 	 */
-	public function show_log() {
+	public function show_log()
+	{
 		// Enabled Only
-		if (mb_strpos($this->_prompt, '#') === FALSE)
+		if (mb_strpos($this->_prompt, '#') === false) {
 			die('Error: User must be enabled to use show_log()'.PHP_EOL);
+		}
 		$result = [];
 		$this->exec('sh log | inc %');
 		$this->_data = explode("\r\n", $this->_data);
@@ -327,8 +352,9 @@ class cisco {
 			$temp = trim($entry);
 			$entry = [];
 			$entry['timestamp'] = mb_substr($temp, 0, mb_strpos($temp, '%') - 2);
-			if ($entry['timestamp'][0] == '.' || $entry['timestamp'][0] == '*')
+			if ($entry['timestamp'][0] == '.' || $entry['timestamp'][0] == '*') {
 				$entry['timestamp'] = mb_substr($entry['timestamp'], 1);
+			}
 			$temp = mb_substr($temp, mb_strpos($temp, '%') + 1);
 			$entry['type'] = mb_substr($temp, 0, mb_strpos($temp, ':'));
 			$temp = mb_substr($temp, mb_strpos($temp, ':') + 2);
@@ -343,25 +369,26 @@ class cisco {
 	 * @param $int
 	 * @return array
 	 */
-	public function show_int($int) {
+	public function show_int($int)
+	{
 		$result = [];
 		$this->exec('show int '.$int);
 		$this->_data = explode("\r\n", $this->_data);
 		foreach ($this->_data as $entry) {
 			$entry = trim($entry);
-			if (mb_strpos($entry, 'line protocol') !== FALSE) {
+			if (mb_strpos($entry, 'line protocol') !== false) {
 				$result['interface'] = mb_substr($entry, 0, mb_strpos($entry, ' '));
-				if (mb_strpos($entry, 'administratively') !== FALSE) {
+				if (mb_strpos($entry, 'administratively') !== false) {
 					$result['status'] = 'disabled';
 				} elseif (mb_substr($entry, mb_strpos($entry, 'line protocol') + 17, 2) == 'up') {
 					$result['status'] = 'connected';
 				} else {
 					$result['status'] = 'notconnect';
 				} // if .. else
-			} elseif (mb_strpos($entry, 'Description: ') !== FALSE) {
+			} elseif (mb_strpos($entry, 'Description: ') !== false) {
 				$entry = explode(':', $entry);
 				$result['description'] = trim($entry[1]);
-			} elseif (mb_strpos($entry, 'MTU') !== FALSE) {
+			} elseif (mb_strpos($entry, 'MTU') !== false) {
 				$entry = explode(',', $entry);
 				$entry[0] = trim($entry[0]);
 				$entry[0] = explode(' ', $entry[0]);
@@ -372,33 +399,33 @@ class cisco {
 				$entry[2] = trim($entry[2]);
 				$entry[2] = explode(' ', $entry[2]);
 				$result['dly'] = $entry[2][1];
-			} elseif (mb_strpos($entry, 'duplex') !== FALSE) {
+			} elseif (mb_strpos($entry, 'duplex') !== false) {
 				$entry = explode(',', $entry);
 				$entry[0] = trim($entry[0]);
 				$entry[0] = explode(' ', $entry[0]);
 				$entry[0][0] = explode('-', $entry[0][0]);
 				$result['duplex'] = strtolower($entry[0][0][0]);
 				$entry[1] = trim($entry[1]);
-				if (mb_strpos($entry[1], 'Auto') !== FALSE) {
+				if (mb_strpos($entry[1], 'Auto') !== false) {
 					$result['speed'] = 'auto';
 				} else {
 					$result['speed'] = (int) $entry[1];
 				} // if .. else
 				$entry[2] = rtrim($entry[2]);
 				$result['type'] = mb_substr($entry[2], mb_strrpos($entry[2], ' ') + 1);
-			} elseif (mb_strpos($entry, 'input rate') !== FALSE) {
+			} elseif (mb_strpos($entry, 'input rate') !== false) {
 				$entry = explode(',', $entry);
 				$result['in_rate'] = mb_substr($entry[0], mb_strpos($entry[0], 'rate') + 5, mb_strrpos($entry[0], ' ') - (mb_strpos($entry[0], 'rate') + 5));
 				$entry = trim($entry[1]);
 				$entry = explode(' ', $entry);
 				$result['in_packet_rate'] = $entry[0];
-			} elseif (mb_strpos($entry, 'output rate') !== FALSE) {
+			} elseif (mb_strpos($entry, 'output rate') !== false) {
 				$entry = explode(',', $entry);
 				$result['out_rate'] = mb_substr($entry[0], mb_strpos($entry[0], 'rate') + 5, mb_strrpos($entry[0], ' ') - (mb_strpos($entry[0], 'rate') + 5));
 				$entry = trim($entry[1]);
 				$entry = explode(' ', $entry);
 				$result['out_packet_rate'] = $entry[0];
-			} elseif (mb_strpos($entry, 'packets input') !== FALSE) {
+			} elseif (mb_strpos($entry, 'packets input') !== false) {
 				$entry = explode(',', $entry);
 				$entry[0] = trim($entry[0]);
 				$entry[0] = explode(' ', $entry[0]);
@@ -411,7 +438,7 @@ class cisco {
 					$entry[2] = explode(' ', $entry[2]);
 					$result['no_buffer'] = $entry[2][0];
 				} // if
-			} elseif (mb_strpos($entry, 'Received') !== FALSE) {
+			} elseif (mb_strpos($entry, 'Received') !== false) {
 				$entry = explode(',', $entry);
 				$entry[0] = trim($entry[0]);
 				$entry[0] = explode(' ', $entry[0]);
@@ -427,7 +454,7 @@ class cisco {
 					$entry[3] = explode(' ', $entry[3]);
 					$result['throttle'] = $entry[3][0];
 				} // if
-			} elseif (mb_strpos($entry, 'CRC') !== FALSE) {
+			} elseif (mb_strpos($entry, 'CRC') !== false) {
 				$entry = explode(',', $entry);
 				$entry[0] = trim($entry[0]);
 				$entry[0] = explode(' ', $entry[0]);
@@ -444,7 +471,7 @@ class cisco {
 				$entry[4] = trim($entry[4]);
 				$entry[4] = explode(' ', $entry[4]);
 				$result['ignored'] = $entry[4][0];
-			} elseif (mb_strpos($entry, 'watchdog') !== FALSE) {
+			} elseif (mb_strpos($entry, 'watchdog') !== false) {
 				$entry = explode(',', $entry);
 				$entry[0] = trim($entry[0]);
 				$entry[0] = explode(' ', $entry[0]);
@@ -457,11 +484,11 @@ class cisco {
 					$entry[2] = explode(' ', $entry[2]);
 					$result['pause_in'] = $entry[2][0];
 				} // if
-			} elseif (mb_strpos($entry, 'dribble') !== FALSE) {
+			} elseif (mb_strpos($entry, 'dribble') !== false) {
 				$entry = trim($entry);
 				$entry = explode(' ', $entry);
 				$result['in_dribble'] = $entry[0];
-			} elseif (mb_strpos($entry, 'packets output') !== FALSE) {
+			} elseif (mb_strpos($entry, 'packets output') !== false) {
 				$entry = explode(',', $entry);
 				$entry[0] = trim($entry[0]);
 				$entry[0] = explode(' ', $entry[0]);
@@ -472,7 +499,7 @@ class cisco {
 				$entry[2] = trim($entry[2]);
 				$entry[2] = explode(' ', $entry[2]);
 				$result['underrun'] = $entry[2][0];
-			} elseif (mb_strpos($entry, 'output errors') !== FALSE) {
+			} elseif (mb_strpos($entry, 'output errors') !== false) {
 				$entry = explode(',', $entry);
 				$entry[0] = trim($entry[0]);
 				$entry[0] = explode(' ', $entry[0]);
@@ -489,7 +516,7 @@ class cisco {
 					$entry[1] = explode(' ', $entry[1]);
 					$result['reset'] = $entry[1][0];
 				} // if .. else
-			} elseif (mb_strpos($entry, 'babbles') !== FALSE) {
+			} elseif (mb_strpos($entry, 'babbles') !== false) {
 				$entry = explode(',', $entry);
 				$entry[0] = trim($entry[0]);
 				$entry[0] = explode(' ', $entry[0]);
@@ -500,7 +527,7 @@ class cisco {
 				$entry[2] = trim($entry[2]);
 				$entry[2] = explode(' ', $entry[2]);
 				$result['deferred'] = $entry[2][0];
-			} elseif (mb_strpos($entry, 'lost carrier') !== FALSE) {
+			} elseif (mb_strpos($entry, 'lost carrier') !== false) {
 				$entry = explode(',', $entry);
 				$entry[0] = trim($entry[0]);
 				$entry[0] = explode(' ', $entry[0]);
@@ -513,7 +540,7 @@ class cisco {
 					$entry[2] = explode(' ', $entry[2]);
 					$result['pause_out'] = $entry[2][0];
 				} // if
-			} elseif (mb_strpos($entry, 'output buffer failures') !== FALSE) {
+			} elseif (mb_strpos($entry, 'output buffer failures') !== false) {
 				$entry = explode(',', $entry);
 				$entry[0] = trim($entry[0]);
 				$entry[0] = explode(' ', $entry[0]);
@@ -530,7 +557,8 @@ class cisco {
 	/**
 	 * @return array
 	 */
-	public function trunk_ports() {
+	public function trunk_ports()
+	{
 		$result = [];
 		$this->exec('show interface status | include trunk');
 		$this->_data = explode("\r\n", $this->_data);
@@ -549,7 +577,8 @@ class cisco {
 	/**
 	 * @return array
 	 */
-	public function vlans() {
+	public function vlans()
+	{
 		$result = [];
 		$this->exec('show spanning-tree summary | include ^VLAN');
 		$this->_data = explode("\r\n", $this->_data);
@@ -569,12 +598,14 @@ class cisco {
 	/**
 	 * @return array
 	 */
-	public function errdisabled() {
+	public function errdisabled()
+	{
 		$result = [];
 		$this->exec('show int status err');
 		$this->_data = explode("\r\n", $this->_data);
-		for ($i = 0; $i < 2; $i++)
+		for ($i = 0; $i < 2; $i++) {
 			array_shift($this->_data);
+		}
 		array_pop($this->_data);
 		$pos = mb_strpos($this->_data[0], 'Status');
 		foreach ($this->_data as $entry) {
@@ -598,7 +629,8 @@ class cisco {
 	/**
 	 * @return array
 	 */
-	public function dhcpsnoop_bindings() {
+	public function dhcpsnoop_bindings()
+	{
 		$result = [];
 		$this->exec('sh ip dhcp snoop binding | inc dhcp-snooping');
 		$this->_data = explode("\r\n", $this->_data);
@@ -614,8 +646,9 @@ class cisco {
 			$entry['lease'] = $temp[2];
 			$entry['vlan'] = $temp[4];
 			$entry['interface'] = $temp[5];
-			if ($temp[3] == 'dhcp-snooping')
+			if ($temp[3] == 'dhcp-snooping') {
 				$result[] = $entry;
+			}
 		}
 		$this->_data = $result;
 		return $this->_data;
@@ -624,23 +657,26 @@ class cisco {
 	/**
 	 * @return array
 	 */
-	public function mac_address_table() {
+	public function mac_address_table()
+	{
 		$result = [];
 		$omit = $this->trunk_ports();
 		$this->exec('show mac address-table | exclude CPU');
 		$this->_data = str_replace('          ', '', $this->_data);
 		$this->_data = explode("\r\n", $this->_data);
-		for ($i = 0; $i < 6; $i++)
+		for ($i = 0; $i < 6; $i++) {
 			array_shift($this->_data);
-		for ($i = 0; $i < 2; $i++)
+		}
+		for ($i = 0; $i < 2; $i++) {
 			array_pop($this->_data);
+		}
 		foreach ($this->_data as $entry) {
 			/** @noinspection PrintfScanfArgumentsInspection */
 			$temp = sscanf($entry, '%s %s %s %s');
 			$entry = [];
 			$entry['mac_address'] = $temp[1];
 			$entry['interface'] = $temp[3];
-			if (in_array($entry['interface'], $omit) == FALSE) {
+			if (in_array($entry['interface'], $omit) == false) {
 				$result[] = $entry;
 			} // if
 		} // foreach
@@ -651,12 +687,14 @@ class cisco {
 	/**
 	 * @return array
 	 */
-	public function arp_table() {
+	public function arp_table()
+	{
 		$result = [];
 		$this->exec('show arp | exc Incomplete');
 		$this->_data = explode("\r\n", $this->_data);
-		for ($i = 0; $i < 2; $i++)
+		for ($i = 0; $i < 2; $i++) {
 			array_shift($this->_data);
+		}
 		array_pop($this->_data);
 		foreach ($this->_data as $entry) {
 			/** @noinspection PrintfScanfArgumentsInspection */
@@ -664,8 +702,9 @@ class cisco {
 			$entry = [];
 			$entry['ip'] = $temp[1];
 			$entry['mac_address'] = $temp[3];
-			if ($temp[2] == '-')
+			if ($temp[2] == '-') {
 				$temp[2] = '0';
+			}
 			$entry['age'] = $temp[2];
 			$entry['interface'] = $temp[5];
 			if ($entry['ip'] != 'Address' && $entry['mac_address'] != 'Incomplete') {
@@ -679,14 +718,17 @@ class cisco {
 	/**
 	 * @return array
 	 */
-	public function ipv6_neighbor_table() {
+	public function ipv6_neighbor_table()
+	{
 		$result = [];
 		$this->exec('show ipv6 neighbors | exc INCMP');
 		$this->_data = explode("\r\n", $this->_data);
-		for ($i = 0; $i < 2; $i++)
+		for ($i = 0; $i < 2; $i++) {
 			array_shift($this->_data);
-		for ($i = 0; $i < 2; $i++)
+		}
+		for ($i = 0; $i < 2; $i++) {
 			array_pop($this->_data);
+		}
 		foreach ($this->_data as $entry) {
 			/** @noinspection PrintfScanfArgumentsInspection */
 			$temp = sscanf($entry, '%s %s %s %s %s');
@@ -704,7 +746,8 @@ class cisco {
 	/**
 	 * @return array
 	 */
-	public function ipv6_routers() {
+	public function ipv6_routers()
+	{
 		$result = [];
 		$this->exec('show ipv6 routers');
 		$this->_data = explode("\r\n", $this->_data);
@@ -733,50 +776,58 @@ class cisco {
 	 * @param $config
 	 * @return null|boolean
 	 */
-	public function configure($config) {
+	public function configure($config)
+	{
 		// USE AT OWN RISK: This function will apply configuration statements to a device.
 		// Enabled Only
-		if (mb_strpos($this->_prompt, '#') === FALSE)
+		if (mb_strpos($this->_prompt, '#') === false) {
 			die('Error: User must be enabled to use configure()'.PHP_EOL);
+		}
 		$this->_data = explode("\n", $config);
 		$this->_ssh->write("config t\n");
 		$config_prompt = $this->_ssh->read('/.*[>|#]/', NET_SSH2_READ_REGEX);
 		$config_prompt = str_replace("\r\n", '', trim($config_prompt));
-		if (mb_strpos($config_prompt, 'config)#') !== FALSE) {
-			foreach ($this->_data as $c)
+		if (mb_strpos($config_prompt, 'config)#') !== false) {
+			foreach ($this->_data as $c) {
 				$this->_ssh->write($c."\n");
+			}
 			$this->_ssh->write("end\n");
 		}
 		$result = $this->_ssh->read($this->_prompt);
 		$result = explode("\r\n", $result);
-		if (count($this->_data) == (count($result) - 2))
-			return TRUE;
-		else
+		if (count($this->_data) == (count($result) - 2)) {
+			return true;
+		} else {
 			die('Error: Switch rejected configuration: '.PHP_EOL.$config."\n");
+		}
 	}
 
 	/**
 	 * @return bool
 	 */
-	public function write_config() {
+	public function write_config()
+	{
 		$this->exec('write');
-		if (mb_strpos($this->_data, '[OK]') !== FALSE)
-			return TRUE; 
-		else
-			return FALSE;
+		if (mb_strpos($this->_data, '[OK]') !== false) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 }
 
 /**
  * Class cisco_parser
  */
-class cisco_parser {
+class cisco_parser
+{
 	/**
 	 * @param $lines
 	 * @param integer $x
 	 * @return int
 	 */
-	public function get_space_depth($lines, $x) {
+	public function get_space_depth($lines, $x)
+	{
 		if (preg_match('/^(?P<spaces>\s+)*(?P<rest>\S.*)$/', $lines[$x], $matches)) {
 			$cdepth = mb_strlen($matches['spaces']);
 		} else {
@@ -791,37 +842,41 @@ class cisco_parser {
 	 * @param int $depth
 	 * @return array
 	 */
-	public function parse_cisco_children($lines, $x = 0, $depth = 0) {
+	public function parse_cisco_children($lines, $x = 0, $depth = 0)
+	{
 		//global $x;
 		$data = [];
-		$last_command = FALSE;
+		$last_command = false;
 		for ($xMax = count($lines); $x < $xMax; $x++) {
 			$cdepth = $this->get_space_depth($lines, $x);
 			$command = ltrim($lines[$x]);
 			$arguments = '';
 			$spacepos = mb_strpos($command, ' ');
-			if ($spacepos !== FALSE) {
+			if ($spacepos !== false) {
 				$arguments = mb_substr($command, $spacepos + 1);
 				$command = mb_substr($command, 0, $spacepos);
 				//echo "Got C|$command|A|$arguments|<br>";
 			}
 			if ($cdepth == $depth) {
 				$new_data = ['command' => $command];
-				if ($arguments != '')
+				if ($arguments != '') {
 					$new_data['arguments'] = trim($arguments);
+				}
 				if ($x + 1 < count($lines)) {
 					$next_depth = $this->get_space_depth($lines, $x + 1);
 					if ($next_depth > $depth) {
 						$new_data['children'] = $this->parse_cisco_children($lines, $x + 1, $next_depth);
-						while ($this->get_space_depth($lines, $x + 1) > $depth)
+						while ($this->get_space_depth($lines, $x + 1) > $depth) {
 							++$x;
+						}
 					}
 				}
 				$data[] = $new_data;
-			} elseif ($cdepth < $depth)
+			} elseif ($cdepth < $depth) {
 				return $data;
-			else
+			} else {
 				echo "SHOULD NEVER GET HERE\n";
+			}
 		}
 		return $data;
 	}
