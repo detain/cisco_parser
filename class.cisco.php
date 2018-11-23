@@ -10,7 +10,7 @@
  *
  * @author Joe Huss <detain@interserver.net>
  * @version $Revision: 58 $
- * @copyright 2018
+ * @copyright 2019
  * @package MyAdmin
  * @category Network
  */
