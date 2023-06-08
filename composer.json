@@ -29,8 +29,8 @@
 		"ext-ssh2": "*"
 	},
 	"autoload": {
-		"classmap": [
-			"cisco_parser.php"
-		]
+		"psr-4" {
+			"Detain\\CiscoParser\\": "src"
+		}
 	}
 }
