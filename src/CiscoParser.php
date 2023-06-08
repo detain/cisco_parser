@@ -1,4 +1,4 @@
-<<?php
+<?php
 /**
  * CISCO Switch Interface Class
  * Basically this is a wrapper to do and parse things from IOS.
