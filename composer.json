@@ -29,7 +29,7 @@
 		"ext-ssh2": "*"
 	},
 	"autoload": {
-		"psr-4" {
+		"psr-4": {
 			"Detain\\CiscoParser\\": "src"
 		}
 	}
