@@ -111,7 +111,7 @@ class CiscoLoader
             if ($regex) {
                 preg_match($pattern, $this->_response, $matches);
                 //echo 'M:'.print_r($matches, TRUE).'<br>';
-                $match = isset($matches[0]) ? $matches[0] : [];
+                $match = $matches[0] ?? [];
             }
             $pos = !empty($match) ? mb_strpos($this->_response, $match) : false;
             //echo ++$i . "POS:".var_export($pos, TRUE).'<br>';
