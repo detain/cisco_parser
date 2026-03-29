@@ -1,3 +1,6 @@
 .bettercodehub.yml
 .idea/workspace.xml
 .idea/libraries
+
+# Caliber local state
+.caliber/
