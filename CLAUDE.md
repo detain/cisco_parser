@@ -1,6 +1,6 @@
 # cisco_parser
 
-Cisco IOS communications and configuration parsing library. PHP >= 5.3, PSR-4, PHPUnit.
+Cisco IOS communications and configuration parsing library. PHP >= 7.4, PSR-4, PHPUnit.
 
 ## Commands
 
@@ -65,7 +65,6 @@ vendor/bin/phpunit tests/ciscoTest.php --filter testMyMethod -v
 
 ## Notes
 
-- `bin/cisco_parser.php` still references legacy `class.cisco.php` include — use autoloader in new code
 - `ext-ssh2` is suggested, not required; guard SSH calls with `extension_loaded('ssh2')`
 - Commit messages: lowercase, descriptive (`fix depth parsing`, `add vlan parser`)
 
@@ -86,3 +85,20 @@ caliber refresh && git add CLAUDE.md .claude/ .cursor/ .github/copilot-instructi
 Read `CALIBER_LEARNINGS.md` for patterns and anti-patterns learned from previous sessions.
 These are auto-extracted from real tool usage — treat them as project-specific rules.
 <!-- /caliber:managed:learnings -->
+
+<!-- caliber:managed:model-config -->
+## Model Configuration
+
+Recommended default: `claude-sonnet-4-6` with high effort (stronger reasoning; higher cost and latency than smaller models).
+Smaller/faster models trade quality for speed and cost — pick what fits the task.
+Pin your choice (`/model` in Claude Code, or `CALIBER_MODEL` when using Caliber with an API provider) so upstream default changes do not silently change behavior.
+
+<!-- /caliber:managed:model-config -->
+
+<!-- caliber:managed:sync -->
+## Context Sync
+
+This project uses [Caliber](https://github.com/caliber-ai-org/ai-setup) to keep AI agent configs in sync across Claude Code, Cursor, Copilot, and Codex.
+Configs update automatically before each commit via `caliber refresh`.
+If the pre-commit hook is not set up, run `/setup-caliber` to configure everything automatically.
+<!-- /caliber:managed:sync -->

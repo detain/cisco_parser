@@ -2,5 +2,11 @@
 .idea/workspace.xml
 .idea/libraries
 
+# Composer artifacts (library — lockfile is consumer-controlled)
+/vendor/
+/composer.lock
+/coverage.xml
+/.phpunit.result.cache
+
 # Caliber local state
 .caliber/
