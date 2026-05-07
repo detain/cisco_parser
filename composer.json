@@ -4,12 +4,22 @@
 	"description": "Cisco IOS communications and configuration parsing library",
 	"keywords": [
 		"cisco",
-		"ssh",
-		"telnet",
+		"cisco-ios",
 		"ios",
+		"ios-xe",
+		"netconf",
 		"router",
 		"switch",
-		"network"
+		"catalyst",
+		"network",
+		"network-automation",
+		"network-configuration",
+		"network-device",
+		"network-monitoring",
+		"network-programmability",
+		"configuration-parser",
+		"parser",
+		"automation"
 	],
 	"license": "LGPL-2.1-only",
 	"authors": [
